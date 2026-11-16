@@ -36,6 +36,13 @@ a{color:var(--azul);text-decoration:none}
 /* ---------- conteudo ---------- */
 #conteudo{flex:1;padding:22px 26px 60px;max-width:1500px}
 .loading{padding:40px;color:var(--cinza)}
+
+/* ---------- aviso de carregando (1.0.12) ---------- */
+.overlay-carregando{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(18,41,74,.34)}
+.overlay-carregando.hidden{display:none}
+.overlay-carregando .caixa{background:var(--branco);border-radius:12px;padding:16px 22px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(16,24,40,.28);font-size:14.5px;color:#1c2430}
+.overlay-carregando .giro{width:20px;height:20px;border:3px solid #d7dde6;border-top-color:var(--azul);border-radius:50%;animation:giroCarregando .8s linear infinite}
+@keyframes giroCarregando{to{transform:rotate(360deg)}}
 h1{font-size:22px;margin:0 0 4px}
 h2{font-size:17px;margin:22px 0 10px}
 h3{font-size:15.5px;margin:0}

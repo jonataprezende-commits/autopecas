@@ -85,6 +85,36 @@ function debounce(fn, ms) {
 const CABECALHO_SEGURANCA = { "X-AutoPecas": "1" };
 function cabecalhosSeguros(extra) { return { ...CABECALHO_SEGURANCA, ...(extra || {}) }; }
 
+// ---- 1.0.12: aviso de "carregando" nas operacoes demoradas ----
+// Contador de pedidos em andamento. O aviso so aparece se a resposta demorar
+// mais que 250ms (chamadas rapidinhas nao piscam a tela) e some quando o
+// ultimo pedido termina. Vale para TODA chamada que passa por api() e para os
+// envios de arquivo (XML, foto), que sao os mais lentos.
+let _pedidosCarregando = 0;
+let _timerCarregando = null;
+function _mostrarCarregando() {
+  _pedidosCarregando++;
+  if (_pedidosCarregando !== 1) return;
+  _timerCarregando = setTimeout(function () {
+    var ov = document.getElementById("overlay-carregando");
+    if (ov && _pedidosCarregando > 0) ov.classList.remove("hidden");
+  }, 250);
+}
+function _esconderCarregando() {
+  _pedidosCarregando = Math.max(0, _pedidosCarregando - 1);
+  if (_pedidosCarregando === 0) {
+    clearTimeout(_timerCarregando);
+    var ov = document.getElementById("overlay-carregando");
+    if (ov) ov.classList.add("hidden");
+  }
+}
+// comCarregando(fn) executa fn mostrando o aviso enquanto ela demorar.
+async function comCarregando(fn) {
+  _mostrarCarregando();
+  try { return await fn(); }
+  finally { _esconderCarregando(); }
+}
+
 async function api(caminho, opcoes) {
   opcoes = Object.assign({}, opcoes || {});
   // 1.0.11: rede de seguranca contra um erro que ja aconteceu de verdade — quem
@@ -105,7 +135,7 @@ async function api(caminho, opcoes) {
     conf.body = JSON.stringify(conf.corpo);
     delete conf.corpo;
   }
-  const resp = await fetch("/api" + caminho, conf);
+  const resp = await comCarregando(() => fetch("/api" + caminho, conf));
   let dados = null;
   const texto = await resp.text();
   try { dados = texto ? JSON.parse(texto) : null; } catch (e) { dados = { erro: texto }; }
@@ -1352,7 +1382,7 @@ async function analisarXML() {
   fd.append("arquivo", window.__arquivo);
   $("#resultado-xml").innerHTML = '<div class="vazio">Analisando o arquivo…</div>';
   try {
-    const resp = await fetch("/api/xml/analisar", { method: "POST", body: fd, headers: cabecalhosSeguros() });
+    const resp = await comCarregando(() => fetch("/api/xml/analisar", { method: "POST", body: fd, headers: cabecalhosSeguros() }));
     const r = await resp.json();
     if (!resp.ok) throw new Error(r.erro || "erro ao analisar");
     let html = `<div class="ok-box">Arquivo lido: <strong>${r.total_itens}</strong> item(ns) encontrados — 
@@ -1384,7 +1414,7 @@ async function importarXML() {
   const btn = $("#btn-importar");
   btn.disabled = true;
   try {
-    const resp = await fetch("/api/xml/importar", { method: "POST", body: fd, headers: cabecalhosSeguros() });
+    const resp = await comCarregando(() => fetch("/api/xml/importar", { method: "POST", body: fd, headers: cabecalhosSeguros() }));
     const r = await resp.json();
     if (!resp.ok) throw new Error(r.erro || "erro ao importar");
     let html = `<div class="ok-box">
@@ -1498,7 +1528,7 @@ async function lerNotaFoto() {
   const fd = new FormData();
   fd.append("arquivo", f);
   try {
-    const resp = await fetch("/api/nota-foto/ler", { method: "POST", body: fd, headers: cabecalhosSeguros() });
+    const resp = await comCarregando(() => fetch("/api/nota-foto/ler", { method: "POST", body: fd, headers: cabecalhosSeguros() }));
     const r = await resp.json();
     if (!resp.ok) throw new Error(r.erro || "não consegui ler a nota");
     NOTA.itens = (r.itens || []).map((it, i) => ({ ...it, incluir: true, _i: i }));

@@ -21,6 +21,10 @@ segue o [SemVer](https://semver.org/lang/pt-BR/).
   ainda não existe (peça sem compra registrada), cai para o último custo.
 - **Integração contínua** (`.github/workflows/ci.yml`): `go build`, `go vet` e
   `go test` a cada push/PR.
+- **Aviso de "carregando"** nas operações demoradas (abrir aba, importar XML,
+  ler foto de nota, backup). Aparece só se a resposta passar de 250 ms — em
+  chamadas instantâneas a tela não pisca — e some ao terminar. Vale para toda
+  chamada feita pelo `api()` do front e para os envios de arquivo.
 - Campo `custo_medio_centavos` na resposta da API de peças.
 - Testes: `TestCustoMedioPonderado`, `TestCustoParaValoracao`,
   `TestEntradaDeCompraAtualizaCustoMedio`, `TestRelatorioEstoqueUsaCustoMedio`,
