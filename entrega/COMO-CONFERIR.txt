@@ -1,0 +1,25 @@
+COMO CONFERIR SE O DOWNLOAD CHEGOU INTEIRO (Windows)
+====================================================
+
+1. Abra a pasta onde você salvou o instalador.
+2. Clique na barra de endereço do Explorer, digite  cmd  e tecle Enter.
+3. Digite (trocando o nome do arquivo se precisar):
+
+   certutil -hashfile AutoPecas-Setup-1.0.11.exe SHA256
+
+4. Compare a linha de letras e números com a linha abaixo. Tem que ser
+   IGUAL, letra por letra:
+
+AutoPecas-Setup-1.0.11.exe
+  f74da3baae10d5b660f94ef8661d9b74a2161816293022066f4cf28f1d21105b
+
+AutoPecas-portatil.exe (só se você usar a versão sem instalar)
+  133d4f1f8ff6e7d9a8b089ee111d95101551610b20b0b5b58011016b9ffae8d1
+
+Manual-AutoPecas.pdf
+  e393c3ce90d79d99585eccb67c1e3ec8367b6d15500d8c035ccf21fb124fc994
+
+Se as letras forem diferentes, o arquivo baixou pela metade ou foi
+alterado: apague e baixe de novo.
+
+O arquivo SHA-256.txt tem a lista completa (inclui os exemplos de XML).

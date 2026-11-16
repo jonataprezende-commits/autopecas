@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc versao="4.00">
+  <NFe>
+    <infNFe Id="NFe35261012345678000199550010000012341000012345">
+      <emit><xNome>Auto Pecas Distribuidora LTDA</xNome></emit>
+      <det nItem="1">
+        <prod>
+          <cProd>SKU-7781</cProd>
+          <cEAN>7891234567890</cEAN>
+          <xProd>Amortecedor dianteiro Corolla 2015 a 2019</xProd>
+          <NCM>87088000</NCM>
+          <marca>Monroe</marca>
+          <uCom>UN</uCom>
+          <qCom>2.0000</qCom>
+          <vUnCom>320.00</vUnCom>
+          <vProd>640.00</vProd>
+        </prod>
+      </det>
+      <det nItem="2">
+        <prod>
+          <cProd>SKU-7782</cProd>
+          <cEAN>7891234567891</cEAN>
+          <xProd>Radiador de agua Saveiro 1.6 2014 a 2018</xProd>
+          <marca>Valeo</marca>
+          <uCom>UN</uCom>
+          <qCom>1.0000</qCom>
+          <vUnCom>450.00</vUnCom>
+          <vProd>450.00</vProd>
+        </prod>
+      </det>
+    </infNFe>
+  </NFe>
+</nfeProc>

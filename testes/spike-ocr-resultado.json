@@ -1,0 +1,18 @@
+[
+  {
+    "rotulo": "A) OCR cru na foto (sem tratamento)",
+    "itens": 7,
+    "campos_certos": 0,
+    "campos_total": 24,
+    "total_lido": false,
+    "conf_media": 83.9
+  },
+  {
+    "rotulo": "B) Endireitada (folha detectada=True) + binarizada",
+    "itens": 8,
+    "campos_certos": 12,
+    "campos_total": 24,
+    "total_lido": false,
+    "conf_media": 76.7
+  }
+]

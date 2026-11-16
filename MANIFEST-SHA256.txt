@@ -1,0 +1,17 @@
+MANIFEST DE CONFERENCIA - espelho do workspace no Dropbox (/AutoPecas/workspace)
+Versao da entrega atual: 1.0.11   |   gerado em 2026-10-29
+Confira no Windows:  certutil -hashfile ARQUIVO SHA256
+
+243fed9d4cb8bc0914e1cc237c33dcd238d1c2a2a3ea539969cd1e634db2b3e6  LEIA-ME-ESPELHO.md  (5595 bytes)
+3e88c25684c6666895260a0984662c7dff4f3081aa12abb30e69f21b5e6b9c8d  BUGS-ENCONTRADOS.md  (9907 bytes)
+e98481509e2b174f3a44d47b03d71cd8aa45f14d72176aaaa0197e08fdb0ef90  CATALOGO-FORNECEDOR.md  (5014 bytes)
+1997174150e91b9142135cc9747f3a418c1da6f47dc51196f06b77a3122be3db  NOTA-FOTO-OCR.md  (7629 bytes)
+a31ddd7e53070c34f5313ec3d52a54cda613af8e13f15017a25d83d2f033fe19  SUGESTOES-ERP.md  (11159 bytes)
+e393c3ce90d79d99585eccb67c1e3ec8367b6d15500d8c035ccf21fb124fc994  Manual-AutoPecas.pdf  (1283366 bytes)
+9a582ba9e913245147bcbaafa2cfeba457367b2daf91d77d080dbbd726a94e48  AutoPecas-codigo-fonte.zip  (37686071 bytes)
+
+Pastas:
+  documentos/ -> BUGS-ENCONTRADOS.md, CATALOGO-FORNECEDOR.md, NOTA-FOTO-OCR.md, SUGESTOES-ERP.md, Manual-AutoPecas.pdf
+  projeto/    -> AutoPecas-codigo-fonte.zip (codigo-fonte + testes; NAO tem .exe nem banco da loja)
+  /AutoPecas/1.0.11/ -> entrega para instalar (setup, portatil, manual, relatorio, SHA-256.txt)
+  versoes anteriores sao APAGADAS do Dropbox (regra a partir da 1.0.10)

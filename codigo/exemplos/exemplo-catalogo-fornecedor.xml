@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<catalogo fornecedor="Distribuidora Exemplo de Autopecas Ltda" data="2026-10-20">
+  <produtos>
+    <produto>
+      <codigo>FOR-1001</codigo>
+      <codigoFabricante>W712/80</codigoFabricante>
+      <descricao>Filtro de oleo Gol 1.0 8v 2008 a 2016</descricao>
+      <marca>Tecfil</marca>
+      <categoria>Filtros</categoria>
+      <preco>18,90</preco>
+      <estoque>24</estoque>
+      <equivalentes><codigo>PH2870</codigo><codigo>WO71280</codigo></equivalentes>
+    </produto>
+    <produto>
+      <codigo>FOR-1002</codigo>
+      <codigoFabricante>ARL-4020</codigoFabricante>
+      <descricao>Pastilha de freio dianteira Onix 1.4 2012 a 2019</descricao>
+      <marca>Fras-le</marca>
+      <categoria>Freios</categoria>
+      <preco>62,50</preco>
+      <estoque>8</estoque>
+      <equivalentes><codigo>PD/864</codigo></equivalentes>
+    </produto>
+    <produto>
+      <codigo>FOR-1003</codigo>
+      <codigoFabricante>51360-SNA</codigoFabricante>
+      <descricao>Bandeja de suspensao Civic 2007 a 2011</descricao>
+      <marca>Nakata</marca>
+      <categoria>Suspensao</categoria>
+      <preco>289,90</preco>
+      <estoque>0</estoque>
+    </produto>
+    <produto>
+      <codigo>FOR-1004</codigo>
+      <descricao>Bomba de combustivel Uno 1.0 2010 a 2013</descricao>
+      <marca>Bosch</marca>
+      <preco>199,00</preco>
+      <estoque>3</estoque>
+    </produto>
+    <produto>
+      <codigo>FOR-1005</codigo>
+      <descricao>Correia dentada Palio 1.0 8v</descricao>
+      <marca>Gates</marca>
+      <preco></preco>
+      <estoque>12</estoque>
+    </produto>
+    <produto>
+      <codigo>FOR-1006</codigo>
+      <codigoFabricante>BOS-9A</codigoFabricante>
+      <descricao>Vela de ignicao NGK Gol 1.0 2014</descricao>
+      <marca>NGK</marca>
+      <preco>34,90</preco>
+      <estoque>15</estoque>
+    </produto>
+    <produto>
+      <codigo></codigo>
+      <descricao></descricao>
+      <preco>0</preco>
+    </produto>
+  </produtos>
+</catalogo>

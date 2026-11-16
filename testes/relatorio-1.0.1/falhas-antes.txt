@@ -1,0 +1,76 @@
+# Saída dos testes ANTES das correções (1.0.0) — prova de que cada bug foi reproduzido
+
+Comando: `go test ./... -count=1 -timeout 240s` (go1.24.6, Linux).
+Todos os itens pedidos falharam por reproduzir o defeito real — nenhum teste falhou por
+erro de compilação ou de infraestrutura.
+
+```
+--- FAIL: TestItem1DescontoDeItemEntraNoTotal
+    total da venda = 9500, esperado 8500 (10000 - 1000 de item - 500 da venda)
+    desconto gravado = 500, esperado 1500 (itens 1000 + venda 500)
+    valor da conta a receber = 9500, esperado 8500
+    total do fechamento do dia = 9500, esperado 8500
+--- FAIL: TestItem2VendaFaturadaSemTravamento (5.01s)
+    TRAVOU: POST /api/vendas nao respondeu em 5s (conexao do banco presa dentro da transacao)
+--- FAIL: TestItem3RestaurarDuasVezesNaMesmaSessao
+    restauracao 2 falhou: status 500 corpo {"erro":"erro ao restaurar: SQL logic error: database bkp is already in use (1)"}
+--- FAIL: TestItem4ReceberPedidoDuasVezesNaoDuplicaEstoque
+    segundo recebimento deveria retornar 409 (pedido ja recebido), veio 200
+    estoque duplicado: 10, esperado 5
+    movimentos de entrada = 2, esperado 1
+--- FAIL: TestItem4PedidoComItemSemFichaFecha
+    pedido com item sem ficha ficou "aberto", esperado recebido
+--- FAIL: TestItem4FalhaEmUmItemNaoDeixaEstoqueParcial
+    recebimento deveria falhar por causa do item invalido, veio 200: {"ok":true,"pendentes":1,"recebidos":1}
+--- FAIL: TestItem5ValidacaoDaVenda (9 subtestes)
+    recebido menor que o total: veio 200 (venda gravada com recebido 4000 e total 5000)
+    preco negativo: veio 200 (venda gravada com preco -100)
+    desconto do item negativo: veio 200 (total do item ficou 5100)
+    desconto da venda negativo: veio 200 (total ficou 5100)
+    valor recebido negativo: veio 200
+    desconto maior que o valor do item: veio 200 (total do item 0, venda 10000)
+    quantidade acima do limite: veio 200 (quantidade 1000001)
+    data em formato invalido: veio 200 (created_at "31/12/2025" gravado direto)
+--- FAIL: TestItem5DataAceitaENormalizada
+    created_at = "2025-01-02", esperado "2025-01-02 00:00:00"
+--- FAIL: TestItem6CancelarVendaPagaGeraEstorno
+    conta de venda paga cancelada ficou "pago", esperado "estornado"
+    lista de recebiveis mostra status pago, esperado estornado
+    relatorio de recebiveis deveria mostrar a situacao "Estornada": ... "Pago" ...
+--- FAIL: TestItem7HostDesconhecidoRetorna403
+    Host "evil.example.com" deveria ser bloqueado com 403, veio 200
+    Host "127.0.0.1:1" deveria ser bloqueado com 403, veio 200
+    Host "atacante.local:8787" deveria ser bloqueado com 403, veio 200
+    Host "10.0.0.5:8787" deveria ser bloqueado com 403, veio 200
+--- FAIL: TestItem7ExigeCabecalhoXAutoPecas
+    POST sem X-AutoPecas deveria dar 403, veio 200
+    PUT/DELETE sem X-AutoPecas deveria dar 403, veio 405
+--- FAIL: TestItem7OriginDeOutroSiteEhBloqueada
+    Origin de outro site deveria dar 403, veio 200
+    requisicao de outro site gravou dados (1 pecas)
+--- FAIL: TestItem7SecFetchSite
+    Sec-Fetch-Site "cross-site" deveria dar 403, veio 200
+    Sec-Fetch-Site "same-site" deveria dar 403, veio 200
+--- FAIL: TestItem7SenhaObrigatoriaForaDoLocalhost
+    iniciar em 0.0.0.0 sem senha deveria ser recusado
+    sem senha deveria dar 401, veio 200
+    com senha errada deveria dar 401, veio 200
+--- FAIL: TestItem9BackupCopiaParaPastaExtra
+    nenhum backup copiado para a pasta extra
+    config nao devolve backup_pasta_extra
+--- FAIL: TestItem9PastaExtraInexistenteNaoAtrapalhaBackup
+    tela de backup deveria avisar que a pasta extra nao existe (aviso_pasta_extra vazio)
+--- FAIL: TestItem10Banco100MigraSemPerderDados
+    user_version = 0, esperado 2
+    coluna order_items.received_at nao foi criada
+    nenhum backup 'antes-de-migrar-*.db' criado antes da migracao
+--- FAIL: TestItem10BancoNovoJaNasceNaVersaoAtual
+    banco novo com user_version 0, esperado 2
+    banco novo sem a coluna order_items.received_at
+```
+
+Não reproduzidos por teste automatizado (verificados de outra forma, no relatório):
+- item 8 (mshta/VBScript): é código de plataforma Windows; verificado por inspeção e por
+  `GOOS=windows go build`.
+- item 9 na parte de `synchronous(NORMAL)`: verificado por inspeção da DSN.
+- item 11: opcional (build `windowsgui` + `-encerrar`).

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>AutoPeças — Manual do Usuário</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 15mm 16mm 15mm;
+  @bottom-center {
+    content: "AutoPeças — Manual do Usuário  ·  página " counter(page);
+    font-family: "DejaVu Sans", sans-serif; font-size: 8pt; color: #667085;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  font-size: 10.2pt; line-height: 1.5; color: #1c2430; margin: 0;
+}
+h1 { font-size: 19pt; color: #12294a; margin: 0 0 2mm; }
+h2 { font-size: 14pt; color: #1557b0; margin: 6mm 0 2mm; border-bottom: 1.5pt solid #dfe3e9; padding-bottom: 1.5mm; }
+h3 { font-size: 11.5pt; color: #12294a; margin: 4mm 0 1.5mm; }
+p { margin: 1.5mm 0; }
+ul, ol { margin: 1.5mm 0 1.5mm 5mm; padding-left: 4mm; }
+li { margin: 1mm 0; }
+img.tela { width: 100%; border: 1pt solid #cfd6e0; border-radius: 2mm; margin: 2mm 0 1mm; }
+.legenda { font-size: 8.6pt; color: #667085; text-align: center; margin: 0 0 3mm; }
+.capa { text-align: center; padding-top: 40mm; page-break-after: always; }
+.capa .logo {
+  display: inline-block; background: #1557b0; color: #fff; border-radius: 6mm;
+  width: 28mm; height: 28mm; line-height: 28mm; font-size: 26pt; font-weight: bold;
+}
+.capa h1 { font-size: 30pt; margin-top: 8mm; }
+.capa .sub { font-size: 13pt; color: #1557b0; margin-top: 2mm; }
+.capa .info { margin-top: 14mm; font-size: 10pt; color: #475467; }
+.capa .caixa {
+  margin: 12mm auto 0; max-width: 130mm; text-align: left; border: 1pt solid #dfe3e9;
+  border-radius: 3mm; padding: 5mm; background: #f8fafc; font-size: 9.4pt;
+}
+.pagina { page-break-before: always; }
+.dica, .atencao, .ok {
+  border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; font-size: 9.6pt;
+}
+.dica { background: #e8f0fb; border-left: 3pt solid #1557b0; }
+.atencao { background: #fff6e0; border-left: 3pt solid #d9a300; }
+.ok { background: #e7f6ed; border-left: 3pt solid #1d7a46; }
+table.simples { width: 100%; border-collapse: collapse; margin: 2mm 0 3mm; font-size: 9.4pt; }
+table.simples th { background: #f0f3f7; text-align: left; padding: 2mm; border: 0.5pt solid #dfe3e9; }
+table.simples td { padding: 2mm; border: 0.5pt solid #e6eaf0; vertical-align: top; }
+kbd {
+  background: #eef2f8; border: 0.5pt solid #c8cfd9; border-radius: 1mm;
+  padding: 0.3mm 1.5mm; font-family: "DejaVu Sans Mono", monospace; font-size: 9pt;
+}
+.indice a { color: #1c2430; text-decoration: none; }
+.indice li { margin: 1.2mm 0; }
+.num { font-weight: bold; color: #1557b0; }
+.duas-col { display: flex; gap: 5mm; }
+.duas-col > div { flex: 1; }
+.fig-pequena { width: 62%; }
+</style>
+</head>
+<body>
+
+<!-- ================= CAPA ================= -->
+<div class="capa">
+  <div class="logo">AP</div>
+  <h1>AutoPeças</h1>
+  <div class="sub">Sistema de gestão para loja de autopeças</div>
+  <div class="sub" style="font-size:11pt;color:#475467;margin-top:6mm">Manual do usuário — página por página</div>
+  <div class="caixa">
+    <strong>O que tem neste manual:</strong>
+    <ul style="margin-bottom:0">
+      <li>Como instalar e abrir o programa no Windows</li>
+      <li>Como cadastrar peças e importar o XML do fornecedor</li>
+      <li>Como vender na bancada, controlar estoque e fichas de falta</li>
+      <li>Como fazer o backup do dia e restaurar em outro computador</li>
+      <li>Como emitir relatórios em CSV e PDF</li>
+    </ul>
+  </div>
+  <div class="info">
+    Versão 1.0.0 · Funciona 100% offline · Banco de dados local (SQLite)<br>
+    Escrito para quem nunca usou um sistema assim.
+  </div>
+</div>
+
+<!-- ================= INDICE ================= -->
+<div class="pagina">
+  <h1>Sumário</h1>
+  <ol class="indice">
+    <li><span class="num">1.</span> Primeiros passos — instalar e abrir o programa</li>
+    <li><span class="num">2.</span> A tela Início (o painel do dia)</li>
+    <li><span class="num">3.</span> Atalhos de teclado que economizam tempo</li>
+    <li><span class="num">4.</span> Cadastro de peças</li>
+    <li><span class="num">5.</span> Importar XML do fornecedor</li>
+    <li><span class="num">6.</span> Estoque (entradas, saídas, ajustes e baixas)</li>
+    <li><span class="num">7.</span> Bancada — venda rápida</li>
+    <li><span class="num">8.</span> Fichas de falta (o caderninho digital)</li>
+    <li><span class="num">9.</span> Pedidos de compra</li>
+    <li><span class="num">10.</span> Clientes e veículos</li>
+    <li><span class="num">11.</span> Fornecedores</li>
+    <li><span class="num">12.</span> Contas a receber</li>
+    <li><span class="num">13.</span> Fechamento do dia</li>
+    <li><span class="num">14.</span> Relatórios (e exportar CSV/PDF)</li>
+    <li><span class="num">15.</span> Backup e ajustes (incluindo restaurar)</li>
+    <li><span class="num">16.</span> Dúvidas frequentes e solução de problemas</li>
+  </ol>
+
+  <h2>Antes de começar: as 5 tarefas do dia a dia</h2>
+  <table class="simples">
+    <tr><th style="width:38%">O que você quer fazer</th><th>Onde clicar</th></tr>
+    <tr><td>Vender uma peça para o cliente</td><td>Menu <strong>Bancada</strong> (ou tecla <kbd>F2</kbd>)</td></tr>
+    <tr><td>Registrar peça que o cliente pediu e não temos</td><td>Menu <strong>Fichas de Falta</strong> (ou <kbd>F4</kbd>)</td></tr>
+    <tr><td>Dar entrada nas peças que chegaram do fornecedor</td><td>Menu <strong>Importar XML</strong> ou <strong>Estoque</strong></td></tr>
+    <tr><td>Ver o que vendeu e quanto entrou de dinheiro</td><td>Menu <strong>Fechamento do Dia</strong></td></tr>
+    <tr><td>Salvar uma cópia dos dados do dia</td><td>Menu <strong>Backup e Ajustes</strong> → <em>Fazer backup agora</em></td></tr>
+  </table>
+</div>
+
+<!-- ================= 1. PRIMEIROS PASSOS ================= -->
+<div class="pagina">
+  <h1>1. Primeiros passos — instalar e abrir</h1>
+
+  <h2>1.1 O que é o AutoPeças</h2>
+  <p>O AutoPeças é um programa que fica <strong>dentro do seu computador</strong>. Ele não precisa de internet,
+  não tem mensalidade e todos os dados ficam gravados em um arquivo no próprio computador.
+  Ele serve para controlar peças, estoque, vendas, clientes, fichas de falta e contas a receber.</p>
+
+  <h2>1.2 O que você precisa</h2>
+  <ul>
+    <li>Um computador com Windows 10 ou 11 (não precisa instalar nada além do programa).</li>
+    <li>Um navegador que já vem no Windows: <strong>Edge</strong>, Chrome ou Firefox.</li>
+    <li>O arquivo <strong>AutoPecas-Setup-1.0.0.exe</strong> (o instalador que veio junto com este manual).</li>
+  </ul>
+
+  <h2>1.3 Instalando (leva 1 minuto)</h2>
+  <ol>
+    <li>Copie o arquivo <strong>AutoPecas-Setup-1.0.0.exe</strong> para o computador da loja
+      (pode ser por pen drive).</li>
+    <li>Dê <strong>dois cliques</strong> no arquivo.</li>
+    <li>Se aparecer a tela azul <em>“O Windows protegeu o computador”</em>, clique em
+      <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>.
+      Isso acontece com qualquer programa novo que não foi baixado da internet — é normal.</li>
+    <li>Na tela do instalador clique em <strong>Instalar</strong> e espere alguns segundos.</li>
+    <li>No final, clique em <strong>Concluir</strong>. Vai aparecer o ícone
+      <strong>AutoPeças</strong> na Área de Trabalho.</li>
+  </ol>
+
+  <div class="dica">
+    <strong>Dica:</strong> se você não tem permissão de administrador no computador, marque a opção
+    <em>“Instalar só para o meu usuário”</em> na primeira tela do instalador.
+  </div>
+
+  <h2>1.4 Abrindo o programa no dia a dia</h2>
+  <ol>
+    <li>Clique duas vezes no ícone <strong>AutoPeças</strong> da Área de Trabalho.</li>
+    <li>Aparece uma <strong>janela preta</strong> com o texto
+      <em>“AutoPeças 1.0.0 — pronto para usar”</em>. Ela é o “motor” do programa.
+      <strong>Deixe essa janela aberta</strong> enquanto estiver trabalhando.</li>
+    <li>Alguns segundos depois o sistema abre sozinho no navegador, no endereço
+      <span style="font-family:monospace">http://127.0.0.1:8787</span>.</li>
+  </ol>
+
+  <div class="atencao">
+    <strong>Atenção:</strong> não feche a janela preta enquanto estiver vendendo.
+    Se fechar, o sistema para de responder. Para fechar o programa do jeito certo, use
+    <strong>Backup e Ajustes → Encerrar o sistema</strong>.
+  </div>
+
+  <div class="ok">
+    <strong>Não tem internet na loja?</strong> Perfeito, o AutoPeças funciona igual. Todos os dados
+    ficam no computador. O navegador usa um endereço interno (127.0.0.1), que funciona sem rede.
+  </div>
+
+</div>
+
+<!-- ================= 2. TELA INICIO ================= -->
+<div class="pagina">
+  <h1>2. A tela Início (o painel do dia)</h1>
+  <p>É a primeira tela que aparece. Ela mostra a situação da loja naquele momento.</p>
+  <img class="tela" src="img-opt/01-inicio.jpg" alt="Tela Início">
+  <p class="legenda">Tela Início — resumo do dia, alertas e atalhos.</p>
+
+  <h3>O que cada parte mostra</h3>
+  <table class="simples">
+    <tr><th style="width:34%">Parte da tela</th><th>Para que serve</th></tr>
+    <tr><td>Faixa amarela de aviso</td>
+        <td>Avisa quando existe peça abaixo do estoque mínimo ou conta a receber vencida.
+            O botão leva direto para a tela de resolver.</td></tr>
+    <tr><td>Vendido hoje</td><td>Quanto entrou de vendas hoje e quantas vendas foram feitas.</td></tr>
+    <tr><td>Vendido no mês</td><td>Total do mês e o lucro estimado (venda menos custo das peças).</td></tr>
+    <tr><td>Abaixo do mínimo</td><td>Quantidade de peças que precisam ser repostas.</td></tr>
+    <tr><td>Fichas de falta</td><td>Pedidos de clientes aguardando peça (e quantos estão parados há 7 dias ou mais).</td></tr>
+    <tr><td>A receber em aberto</td><td>Vendas faturadas que ainda não foram pagas, e quantas estão vencidas.</td></tr>
+    <tr><td>Estoque (custo)</td><td>Quanto de dinheiro está parado no estoque, pelo preço de custo.</td></tr>
+    <tr><td>Peças abaixo do estoque mínimo</td><td>Lista das peças que precisam ser compradas, com a quantidade sugerida de compra.</td></tr>
+    <tr><td>Últimas vendas</td><td>As últimas vendas feitas. Clique em uma linha para ver os detalhes ou cancelar.</td></tr>
+  </table>
+
+  <h3>Botões do topo</h3>
+  <ul>
+    <li><strong>Nova venda (F2)</strong> — abre a bancada para vender.</li>
+    <li><strong>Nova ficha (F4)</strong> — abre o cadastro de ficha de falta.</li>
+    <li><strong>Importar XML</strong> — abre o leitor de arquivo do fornecedor.</li>
+  </ul>
+
+  <div class="dica">
+    <strong>Dica:</strong> os números que aparecem no rodapé do menu (à esquerda, em vermelho) são avisos
+    rápidos: estoque baixo, fichas abertas e contas vencidas. Eles aparecem em qualquer tela do sistema.
+  </div>
+</div>
+
+<!-- ================= 3. ATALHOS ================= -->
+<div class="pagina">
+  <h1>3. Atalhos de teclado que economizam tempo</h1>
+  <p>Os atalhos funcionam em qualquer tela do sistema. Você não precisa decorar todos: comece pelo
+  <kbd>F2</kbd> (vender) e pelo <kbd>F9</kbd> (finalizar a venda).</p>
+
+  <table class="simples">
+    <tr><th style="width:20%">Tecla</th><th>O que faz</th></tr>
+    <tr><td><kbd>F2</kbd></td><td>Abre a <strong>Bancada</strong> e já deixa o cursor no campo de busca de peça.</td></tr>
+    <tr><td><kbd>F3</kbd></td><td>Abre o <strong>Cadastro de peças</strong> com o cursor na busca.</td></tr>
+    <tr><td><kbd>F4</kbd></td><td>Abre uma <strong>nova ficha de falta</strong>.</td></tr>
+    <tr><td><kbd>F8</kbd></td><td>Abre o <strong>Fechamento do dia</strong>.</td></tr>
+    <tr><td><kbd>F9</kbd></td><td><strong>Finaliza a venda</strong> que está na bancada.</td></tr>
+    <tr><td><kbd>/</kbd></td><td>Vai para a busca de peças (funciona quando você não está digitando).</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>B</kbd></td><td>Abre <strong>Backup e Ajustes</strong>.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Fecha a janela (janela de cadastro, confirmação, cupom).</td></tr>
+    <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Na bancada, escolhe a peça na lista de resultados da busca.</td></tr>
+    <tr><td><kbd>Enter</kbd></td><td>Na bancada, adiciona a peça escolhida ao carrinho.</td></tr>
+  </table>
+
+  <h3>Como vender usando só o teclado (o jeito mais rápido)</h3>
+  <ol>
+    <li><kbd>F2</kbd> — vai para a bancada.</li>
+    <li>Digite o código ou parte da descrição da peça (ex.: <span style="font-family:monospace">filtro gol</span>).</li>
+    <li><kbd>↓</kbd> para escolher e <kbd>Enter</kbd> para jogar no carrinho.</li>
+    <li>Digite o nome do cliente, a placa e o valor recebido.</li>
+    <li><kbd>F9</kbd> — a venda é gravada, o estoque baixa e o cupom aparece na tela.</li>
+  </ol>
+
+  <div class="dica">
+    <strong>Dica:</strong> a busca entende acento ou sem acento
+    (“pastilha”, “PASTILHA”, “pastílha” encontram a mesma peça) e também procura pelo
+    código do fabricante e pelos códigos equivalentes.
+  </div>
+</div>
+
+<!-- ================= 4. PECAS ================= -->
+<div class="pagina">
+  <h1>4. Cadastro de peças</h1>
+  <p>Menu <strong>Peças</strong>. Aqui ficam todas as peças da loja, com os códigos de cruzamento.</p>
+  <img class="tela" src="img-opt/07-pecas.jpg" alt="Tela de cadastro de peças">
+  <p class="legenda">Tela Peças — lista com estoque, custo e preço de venda.</p>
+
+  <h3>Como buscar (encontra em menos de 2 segundos)</h3>
+  <p>Digite no campo <strong>“Buscar peça…”</strong> qualquer um destes dados:</p>
+  <ul>
+    <li>parte da descrição — <span style="font-family:monospace">filtro oleo</span></li>
+    <li>o código da loja — <span style="font-family:monospace">1042</span></li>
+    <li>o código do fabricante — <span style="font-family:monospace">W712/80</span></li>
+    <li>um código equivalente/OEM — <span style="font-family:monospace">PH2870</span></li>
+    <li>a marca — <span style="font-family:monospace">tecfil</span></li>
+    <li>a categoria — <span style="font-family:monospace">freios</span></li>
+    <li>o local no depósito — <span style="font-family:monospace">corredor 2</span></li>
+  </ul>
+  <p>A lista se atualiza enquanto você digita. O resultado mais “exato” aparece primeiro
+  (código igual, depois código do fabricante, depois equivalente).</p>
+
+  <h3>Cadastrar uma peça nova</h3>
+  <ol>
+    <li>Clique em <strong>+ Nova peça</strong>.</li>
+    <li>Preencha a <strong>Descrição</strong> (obrigatória). Ex.: <em>Filtro de óleo Gol 1.0 8v</em>.</li>
+    <li>Informe o <strong>Código da loja</strong> (o seu número de balcão, ex.: 1042) e o
+      <strong>Código do fabricante</strong>.</li>
+    <li>Preencha marca, categoria, local no depósito e fornecedor.</li>
+    <li>Coloque o <strong>preço de custo</strong> e o <strong>preço de venda</strong>. Ao sair do campo de custo,
+      o sistema sugere automaticamente um preço de venda com 60% de margem (você pode mudar).</li>
+    <li>Informe o <strong>estoque mínimo</strong> (quando o sistema deve avisar que está acabando)
+      e o <strong>estoque inicial</strong>.</li>
+    <li>Adicione os <strong>códigos equivalentes/OEM</strong>: digite o código e aperte <kbd>Enter</kbd>
+      (ou clique em <em>Adicionar</em>). Pode colocar quantos quiser.</li>
+    <li>Clique em <strong>Salvar peça</strong>.</li>
+  </ol>
+  <img class="fig-pequena tela" src="img-opt/09-peca-ficha.jpg" alt="Ficha da peça">
+  <p class="legenda">Ficha da peça — o mesmo formulário serve para editar e mostra as últimas movimentações.</p>
+
+  <div class="dica">
+    <strong>Códigos equivalentes são o coração do cruzamento:</strong> se o cliente chega com
+    <em>“PH2870”</em> na mão, e essa peça está nos equivalentes do seu filtro,
+    a busca acha a peça certa mesmo que o número não seja o seu código.
+  </div>
+
+  <h3>Editar, inativar e ver histórico</h3>
+  <ul>
+    <li>Clique em qualquer linha da lista para abrir a ficha e editar.</li>
+    <li>Na ficha aparecem as <strong>últimas movimentações</strong> de estoque daquela peça.</li>
+    <li><strong>Inativar peça</strong> tira a peça das buscas, mas mantém o histórico de vendas.
+        Use quando parar de trabalhar com uma peça.</li>
+    <li>O botão <strong>Estoque</strong> (na lista) abre a movimentação dessa peça.</li>
+  </ul>
+
+  <div class="atencao">
+    <strong>Atenção:</strong> o estoque atual não é alterado pela ficha de cadastro. Para mudar o saldo,
+    use a tela <strong>Estoque</strong> (entrada, saída, ajuste ou baixa). Assim fica registrado o motivo
+    de cada mudança.
+  </div>
+</div>
+
+<!-- ================= 5. XML ================= -->
+<div class="pagina">
+  <h1>5. Importar XML do fornecedor</h1>
+  <p>Menu <strong>Importar XML</strong>. Serve para dar entrada nas peças do fornecedor
+  usando o arquivo XML de catálogo, cotação ou nota fiscal — sem digitar nada.</p>
+  <img class="tela" src="img-opt/10-xml.jpg" alt="Tela de importação de XML">
+
+  <h3>Passo a passo</h3>
+  <ol>
+    <li>No campo <strong>“Arraste o arquivo XML aqui”</strong>, arraste o arquivo com o mouse
+        ou clique nele e escolha o arquivo no computador.</li>
+    <li>Confira as opções (elas já vêm prontas para o uso normal):
+      <ul>
+        <li><strong>O preço do XML é:</strong> <em>preço de custo</em> ou <em>preço de venda</em>.
+            Na dúvida, deixe “preço de custo”.</li>
+        <li><strong>Margem para calcular a venda (%):</strong> 60% por padrão. O sistema calcula
+            <em>venda = custo + 60%</em>.</li>
+        <li><strong>Fornecedor deste arquivo:</strong> liga as peças ao fornecedor.</li>
+        <li><strong>Cadastrar peças novas</strong> — marcado.</li>
+        <li><strong>Atualizar preço de custo / venda</strong> — marcado (atualiza o que já existe).</li>
+        <li><strong>Lançar o estoque informado no XML como ENTRADA</strong> — marque esta opção
+            quando o arquivo for de <strong>mercadoria que chegou</strong>.</li>
+        <li><strong>Fechar fichas de falta que batem</strong> — marcado (veja o item 8).</li>
+      </ul></li>
+    <li>Clique em <strong>Analisar arquivo</strong> para ver uma prévia (nada é gravado ainda).</li>
+    <li>Se estiver tudo certo, clique em <strong>Importar agora</strong>.</li>
+  </ol>
+
+  <img class="tela" src="img-opt/11-xml-analise.jpg" alt="Prévia da análise do XML">
+  <p class="legenda">Prévia: mostra quantas peças seriam cadastradas e quantas seriam atualizadas, e como o sistema leu cada item.</p>
+
+  <img class="tela" src="img-opt/12-xml-resultado.jpg" alt="Resultado da importação">
+  <p class="legenda">Resultado: quantas foram cadastradas, atualizadas e ignoradas — e o motivo de cada ignorada.</p>
+
+  <h3>Como o sistema evita peça duplicada</h3>
+  <p>Antes de cadastrar, o programa procura a peça em três lugares, nesta ordem:</p>
+  <ol>
+    <li>pelo <strong>código do fabricante</strong> (ex.: W712/80);</li>
+    <li>pelo <strong>código/EAN</strong> que veio no arquivo;</li>
+    <li>pelos <strong>códigos equivalentes</strong> já cadastrados na sua ficha da peça.</li>
+  </ol>
+  <p>Se achou, ela é <strong>atualizada</strong> (preço, custo, marca) e nunca duplicada.
+  Se não achou, ela é <strong>cadastrada</strong>.</p>
+
+  <div class="ok">
+    <strong>Testado:</strong> importando o mesmo arquivo duas vezes seguidas, o resultado é
+    <em>“0 cadastradas, 6 atualizadas”</em> — nenhuma peça repetida.
+  </div>
+
+  <div class="atencao">
+    <strong>Itens ignorados:</strong> aparecem na lista com o motivo (por exemplo, “Código repetido
+    dentro do próprio arquivo XML” ou “Item sem descrição no XML”). Normalmente são linhas
+    de frete, observação ou peça que veio em branco no arquivo.
+  </div>
+
+  <div class="dica">
+    <strong>O sistema aceita o formato do seu fornecedor.</strong> Ele reconhece os nomes de campos mais usados
+    do mercado (descricao/desc/xProd, codigoFabricante/referencia, marca, preco/valor, estoque/qtd,
+    equivalentes/OEM) e também notas fiscais eletrônicas.
+    Se o seu fornecedor usar nomes diferentes, é só mandar um XML real de exemplo que o leitor é ajustado.
+  </div>
+</div>
+
+<!-- ================= 6. ESTOQUE ================= -->
+<div class="pagina">
+  <h1>6. Estoque</h1>
+  <p>Menu <strong>Estoque</strong>. Toda mudança de saldo passa por aqui e fica registrada com data e motivo.</p>
+  <img class="tela" src="img-opt/13-estoque.jpg" alt="Tela de estoque">
+
+  <h3>Movimentar uma peça</h3>
+  <ol>
+    <li>Busque a peça no campo do topo e clique nela.</li>
+    <li>Escolha o <strong>tipo de movimento</strong>:
+      <ul>
+        <li><strong>Entrada (compra/recebimento)</strong> — chegou mercadoria. Soma no estoque.</li>
+        <li><strong>Saída (venda/uso)</strong> — saiu peça por outro motivo que não seja a bancada.</li>
+        <li><strong>Ajuste (corrigir saldo)</strong> — você digita o <em>saldo correto</em> depois de contar a prateleira.</li>
+        <li><strong>Baixa (perda, avaria, garantia)</strong> — peça estragada, perdida ou trocada na garantia.</li>
+      </ul></li>
+    <li>Informe a quantidade (ou o novo saldo, no caso de ajuste) e o <strong>motivo</strong>
+        — o motivo é obrigatório em ajuste e baixa.</li>
+    <li>Clique em <strong>Confirmar movimento</strong>.</li>
+  </ol>
+
+  <div class="duas-col">
+    <div>
+      <h3>Alerta de estoque mínimo</h3>
+      <p>A coluna da direita mostra <strong>todas as peças abaixo do mínimo</strong>, sempre atualizada.
+      A mesma lista aparece na tela Início. O botão <em>Entrada</em> abre a movimentação da peça.</p>
+    </div>
+    <div>
+      <h3>Histórico</h3>
+      <p>Abaixo ficam as últimas 200 movimentações, com data, tipo, quantidade, saldo depois do movimento
+      e o motivo. Use o filtro de data para ver um dia específico.</p>
+    </div>
+  </div>
+
+  <div class="dica">
+    <strong>Vender sem estoque:</strong> por padrão o sistema permite vender peça com saldo zero
+    (o saldo fica negativo e aparece em vermelho). Se você não quiser isso, desmarque a opção em
+    <strong>Backup e Ajustes → Permitir vender peça sem estoque</strong>.
+  </div>
+</div>
+
+<!-- ================= 7. BANCADA ================= -->
+<div class="pagina">
+  <h1>7. Bancada — venda rápida</h1>
+  <p>Menu <strong>Bancada</strong> (ou <kbd>F2</kbd>). É a tela que você vai usar o dia inteiro.</p>
+  <img class="tela" src="img-opt/03-bancada.jpg" alt="Tela da bancada">
+  <p class="legenda">Bancada: busca de peça à esquerda, cliente e pagamento à direita.</p>
+
+  <h3>Passo a passo da venda</h3>
+  <ol>
+    <li><strong>Busque a peça</strong> no campo grande. Digite o código, parte da descrição,
+        o código do fabricante ou um equivalente. A lista aparece na hora.</li>
+    <li><strong>Clique na peça</strong> (ou use <kbd>↓</kbd> e <kbd>Enter</kbd>). Ela vai para o
+        <strong>Carrinho</strong>.</li>
+    <li>No carrinho você pode mudar a <strong>quantidade</strong>, o <strong>preço</strong> e dar
+        <strong>desconto</strong> por item. Para tirar a peça, clique no <strong>✕</strong>.</li>
+    <li>Preencha o <strong>cliente</strong> (opcional — comece a digitar e escolha na lista),
+        a <strong>placa</strong>, o <strong>modelo</strong> e o <strong>ano</strong> do veículo.</li>
+    <li>Escolha a <strong>forma de pagamento</strong> e digite o <strong>valor recebido</strong>.
+        O sistema calcula o <strong>troco</strong> sozinho (aparece em verde).</li>
+    <li>Se precisar, coloque um <strong>desconto na venda</strong> e uma <strong>observação</strong>.</li>
+    <li>Clique em <strong>Finalizar venda (F9)</strong>.</li>
+  </ol>
+
+  <img class="tela" src="img-opt/05-bancada-carrinho.jpg" alt="Carrinho com peça e troco calculado">
+  <p class="legenda">Carrinho preenchido: o troco é calculado automaticamente.</p>
+
+  <h3>O que acontece ao finalizar</h3>
+  <ul>
+    <li>A venda é gravada com número, data e hora.</li>
+    <li>O <strong>estoque baixa automaticamente</strong> na quantidade vendida.</li>
+    <li>Aparece a tela de confirmação com o <strong>cupom</strong> para imprimir (se quiser).</li>
+    <li>Se o pagamento for <strong>Faturado</strong>, a venda vira uma
+        <strong>conta a receber</strong> com data de vencimento.</li>
+  </ul>
+
+  <img class="fig-pequena tela" src="img-opt/06-venda-concluida.jpg" alt="Venda concluída">
+  <p class="legenda">Confirmação da venda: total, pagamento, troco, lucro estimado e cupom.</p>
+
+  <h3>Formas de pagamento</h3>
+  <table class="simples">
+    <tr><th style="width:26%">Forma</th><th>Como o sistema trata</th></tr>
+    <tr><td>Dinheiro</td><td>Calcula troco pelo valor recebido.</td></tr>
+    <tr><td>PIX</td><td>Igual ao dinheiro (só não calcula troco a menos que você informe).</td></tr>
+    <tr><td>Cartão</td><td>Entra no fechamento como cartão.</td></tr>
+    <tr><td>Faturado (a prazo)</td><td>Vira conta a receber, com vencimento em dias (padrão 30).</td></tr>
+    <tr><td>Transferência</td><td>Entra no fechamento como transferência.</td></tr>
+  </table>
+
+  <div class="dica">
+    <strong>Cancelar uma venda:</strong> na tela <strong>Início</strong>, clique na venda em “Últimas vendas”
+    e use <em>Cancelar venda</em>. O estoque das peças volta automaticamente.
+  </div>
+</div>
+
+<!-- ================= 8. FICHAS ================= -->
+<div class="pagina">
+  <h1>8. Fichas de falta (o caderninho digital)</h1>
+  <p>Menu <strong>Fichas de Falta</strong> (ou <kbd>F4</kbd>). Use quando o cliente pede uma peça
+  que não tem em estoque.</p>
+  <img class="tela" src="img-opt/15-fichas.jpg" alt="Tela de fichas de falta">
+  <p class="legenda">Lista das fichas, com cliente, veículo, dias em aberto e botões de ação.</p>
+
+  <h3>Abrir uma ficha</h3>
+  <ol>
+    <li>Clique em <strong>+ Nova ficha (F4)</strong>.</li>
+    <li>No campo <strong>1. Peça</strong>, busque a peça no cadastro e clique nela
+        (isso liga a ficha à peça, e depois permite dar entrada automática no estoque).</li>
+    <li>Se a peça <strong>ainda não estiver cadastrada</strong>, não tem problema: deixe em branco e
+        escreva a descrição no campo <strong>Descrição da peça pedida</strong>.</li>
+    <li>Informe a <strong>quantidade</strong>, o <strong>custo estimado</strong> e o <strong>fornecedor</strong>
+        que costuma trazer essa peça.</li>
+    <li>Preencha o <strong>cliente</strong> (com telefone) e o <strong>veículo</strong>
+        (modelo, placa, ano).</li>
+    <li>Clique em <strong>Salvar ficha</strong>.</li>
+  </ol>
+  <img class="fig-pequena tela" src="img-opt/17-ficha-preenchida.jpg" alt="Nova ficha preenchida">
+  <p class="legenda">Nova ficha: o cliente, o telefone e o veículo ficam gravados para avisar quando a peça chegar.</p>
+
+  <h3>Os status da ficha</h3>
+  <table class="simples">
+    <tr><th style="width:24%">Status</th><th>Significado</th></tr>
+    <tr><td><strong>Aberta</strong></td><td>O cliente pediu e ainda não foi comprado.</td></tr>
+    <tr><td><strong>Pedida</strong></td><td>Já entrou em um pedido de compra do fornecedor.</td></tr>
+    <tr><td><strong>Recebida</strong></td><td>A peça chegou: a ficha fecha e a entrada no estoque é lançada.</td></tr>
+  </table>
+
+  <h3>Quando a peça chega — 3 formas de fechar a ficha</h3>
+  <ol>
+    <li><strong>Pelo XML do fornecedor:</strong> importe o arquivo normalmente. As fichas que batem
+        com as peças do arquivo fecham sozinhas e o estoque entra.</li>
+    <li><strong>Pelo pedido de compra:</strong> abra o pedido em <strong>Pedidos</strong> e clique em
+        <em>Receber pedido</em> (veja o item 9).</li>
+    <li><strong>Na mão:</strong> clique em <strong>Receber</strong> na linha da ficha.
+        Se a ficha foi criada só com descrição, o sistema pede para você escolher a peça no cadastro
+        antes de dar entrada.</li>
+  </ol>
+
+  <h3>Abas de filtro</h3>
+  <p><em>Ativas</em> (abertas + pedidas) · <em>Só abertas</em> · <em>Só pedidas</em> · <em>Recebidas</em> ·
+     <em>Abertas há 7+ dias</em> · <em>Todas</em>.</p>
+
+  <div class="atencao">
+    <strong>Fichas paradas:</strong> a coluna <strong>Dias</strong> fica em vermelho a partir de 7 dias.
+    Use o botão <em>Abertas há 7+ dias</em> toda semana para cobrar o fornecedor e avisar o cliente.
+  </div>
+</div>
+
+<!-- ================= 9. PEDIDOS ================= -->
+<div class="pagina">
+  <h1>9. Pedidos de compra</h1>
+  <p>Menu <strong>Pedidos</strong>. O pedido é gerado a partir das fichas de falta,
+  <strong>agrupadas por fornecedor</strong>, com o custo estimado.</p>
+
+  <h3>Gerar um pedido</h3>
+  <ol>
+    <li>Abra <strong>Fichas de Falta</strong> e clique em <strong>Gerar pedido por fornecedor</strong>.</li>
+    <li>O sistema mostra o que vai pedir, separado por fornecedor, com quantidade e subtotal.</li>
+    <li>Clique em <strong>Gerar N pedido(s)</strong>. As fichas passam para o status <em>Pedida</em>.</li>
+  </ol>
+  <img class="tela" src="img-opt/18-gerar-pedido.jpg" alt="Confirmação do pedido de compra">
+  <p class="legenda">Antes de gerar, você confere tudo o que será pedido em cada fornecedor.</p>
+
+  <h3>Acompanhar e receber</h3>
+  <ol>
+    <li>Abra <strong>Pedidos</strong> e clique em <strong>Abrir</strong> no pedido desejado.</li>
+    <li>Quando a mercadoria chegar, clique em <strong>Receber pedido (entra no estoque)</strong>.</li>
+    <li>Pronto: todas as peças entram no estoque, as fichas de falta fecham e o pedido fica como
+        <em>recebido</em>.</li>
+  </ol>
+  <img class="tela" src="img-opt/20-pedido-detalhe.jpg" alt="Detalhe do pedido">
+  <p class="legenda">Detalhe do pedido: itens, custo estimado e status de cada ficha.</p>
+
+  <div class="dica">
+    <strong>Pedido errado?</strong> Use <em>Cancelar pedido</em>. O pedido é cancelado e as fichas voltam
+    para o status <em>aberta</em>, sem mexer no estoque.
+  </div>
+
+  <div class="ok">
+    <strong>Testado:</strong> abrir ficha → gerar pedido → receber pedido fecha a ficha e soma a
+    quantidade no estoque da peça.
+  </div>
+</div>
+
+<!-- ================= 10. CLIENTES ================= -->
+<div class="pagina">
+  <h1>10. Clientes e veículos</h1>
+  <p>Menu <strong>Clientes</strong>.</p>
+  <img class="tela" src="img-opt/21-clientes.jpg" alt="Tela de clientes">
+
+  <h3>Cadastrar um cliente</h3>
+  <ol>
+    <li>Clique em <strong>+ Novo cliente</strong>.</li>
+    <li>Preencha nome (obrigatório), telefone, CPF/CNPJ, endereço e observações.</li>
+    <li>Clique em <strong>Salvar</strong>.</li>
+  </ol>
+
+  <h3>Veículos do cliente</h3>
+  <p>Abra o cliente e, na seção <strong>Veículos</strong>, informe placa, modelo e ano e clique em
+  <strong>Adicionar</strong>. Pode cadastrar vários veículos por cliente.</p>
+
+  <h3>Histórico do cliente</h3>
+  <p>Ao abrir um cliente você vê, na mesma tela:</p>
+  <ul>
+    <li><strong>Compras</strong> — todas as vendas feitas para ele (clique para ver os itens);</li>
+    <li><strong>Fichas de falta</strong> — o que ele pediu e ainda está em aberto;</li>
+    <li><strong>Veículos</strong> — os carros dele.</li>
+  </ul>
+  <img class="tela" src="img-opt/22-cliente-historico.jpg" alt="Histórico do cliente">
+  <p class="legenda">Ficha do cliente com veículos, compras e fichas de falta.</p>
+
+  <div class="dica">
+    <strong>Busca de cliente</strong> aceita nome, telefone, CPF/CNPJ, placa ou modelo do veículo.
+    Muito útil quando o cliente chega e você só sabe a placa.
+  </div>
+</div>
+
+<!-- ================= 11. FORNECEDORES ================= -->
+<div class="pagina">
+  <h1>11. Fornecedores</h1>
+  <p>Menu <strong>Fornecedores</strong>. Cada ficha de falta, pedido de compra e peça pode ser ligada a um fornecedor.</p>
+  <img class="tela" src="img-opt/23-fornecedores.jpg" alt="Tela de fornecedores">
+
+  <h3>Cadastrar</h3>
+  <ol>
+    <li>Clique em <strong>+ Novo fornecedor</strong>.</li>
+    <li>Preencha nome/razão social (obrigatório), pessoa de contato, telefone/WhatsApp, e-mail e
+        observações (ex.: “entrega terça e quinta”, “pedido mínimo R$ 500”).</li>
+    <li>Clique em <strong>Salvar</strong>.</li>
+  </ol>
+
+  <p>A lista mostra quantas <strong>fichas abertas</strong> e quantas <strong>peças</strong> estão ligadas
+  a cada fornecedor — assim você sabe com quem tem mais coisa pendente.</p>
+
+  <div class="dica">
+    <strong>No dia a dia:</strong> ao importar um XML, escolha o fornecedor do arquivo.
+    Na ficha de falta, escolha o fornecedor que costuma trazer aquela peça.
+    Com isso, o <em>Gerar pedido por fornecedor</em> já separa tudo certinho.
+  </div>
+</div>
+
+<!-- ================= 12. RECEBER ================= -->
+<div class="pagina">
+  <h1>12. Contas a receber</h1>
+  <p>Menu <strong>Contas a Receber</strong>. Toda venda feita como <strong>Faturado</strong> entra aqui
+  automaticamente, com data de vencimento.</p>
+  <img class="tela" src="img-opt/24-receber.jpg" alt="Tela de contas a receber">
+
+  <h3>Como usar</h3>
+  <ul>
+    <li>As abas mostram: <strong>Em aberto</strong>, <strong>Vencidas</strong>, <strong>Pagas</strong> e <strong>Todas</strong>.</li>
+    <li>Contas vencidas aparecem em vermelho com o número de dias de atraso.</li>
+    <li>Quando o cliente pagar, clique em <strong>Receber</strong> e confirme. A conta sai da lista de abertas.</li>
+    <li>O total em aberto aparece embaixo da lista.</li>
+  </ul>
+
+  <div class="atencao">
+    <strong>Alerta de vencimento:</strong> contas vencidas aparecem na faixa vermelha da tela Início e no
+    rodapé do menu (em qualquer tela). Também ficam no relatório
+    <em>Contas a receber</em>, com a coluna de atraso.
+  </div>
+
+  <p>O prazo padrão do faturado (30 dias) pode ser mudado em
+  <strong>Backup e Ajustes → Prazo padrão de faturado</strong>.</p>
+</div>
+
+<!-- ================= 13. FECHAMENTO ================= -->
+<div class="pagina">
+  <h1>13. Fechamento do dia</h1>
+  <p>Menu <strong>Fechamento do Dia</strong> (ou <kbd>F8</kbd>). É o “caixa” do dia.</p>
+  <img class="tela" src="img-opt/25-fechamento.jpg" alt="Tela de fechamento do dia">
+  <p class="legenda">Fechamento: total vendido, lucro, ticket médio, formas de pagamento e itens vendidos.</p>
+
+  <h3>O que aparece</h3>
+  <ul>
+    <li><strong>Total vendido</strong> no dia e número de vendas;</li>
+    <li><strong>Lucro estimado</strong> (total vendido menos o custo das peças vendidas);</li>
+    <li><strong>Ticket médio</strong> (média por venda);</li>
+    <li><strong>Itens vendidos</strong> (quantidade total e peças diferentes);</li>
+    <li><strong>Por forma de pagamento</strong> — dinheiro, PIX, cartão, transferência e faturado;</li>
+    <li><strong>Itens vendidos</strong> — lista de peças com quantidade e total.</li>
+  </ul>
+
+  <h3>Outros dias e impressão</h3>
+  <ul>
+    <li>Mude a data no campo do topo para ver o fechamento de outro dia.</li>
+    <li>Clique em <strong>Imprimir</strong> para tirar o fechamento no papel (ou salvar em PDF).</li>
+  </ul>
+
+  <div class="ok">
+    <strong>Testado:</strong> ao finalizar uma venda, o valor aparece no fechamento do dia e o estoque
+    da peça diminui na mesma hora.
+  </div>
+</div>
+
+<!-- ================= 14. RELATORIOS ================= -->
+<div class="pagina">
+  <h1>14. Relatórios</h1>
+  <p>Menu <strong>Relatórios</strong>. Escolha o relatório, o período e clique em <strong>Gerar</strong>.</p>
+  <img class="tela" src="img-opt/26-relatorios.jpg" alt="Tela de relatórios">
+
+  <h3>Relatórios disponíveis</h3>
+  <table class="simples">
+    <tr><th style="width:38%">Relatório</th><th>Mostra</th></tr>
+    <tr><td>Vendas no período</td><td>Cada venda (data, cliente, veículo, pagamento, total e lucro) + totais por forma de pagamento.</td></tr>
+    <tr><td>Lucro estimado por dia</td><td>Por dia: quantidade de vendas, total vendido, custo e lucro.</td></tr>
+    <tr><td>Produtos mais vendidos</td><td>Ranking por quantidade, com total vendido e lucro.</td></tr>
+    <tr><td>Peças abaixo do estoque mínimo</td><td>Lista de compra, com quantidade sugerida e custo estimado da reposição.</td></tr>
+    <tr><td>Pedidos de compra abertos</td><td>Pedidos por fornecedor e total estimado.</td></tr>
+    <tr><td>Fichas de falta em aberto</td><td>Fichas pendentes, cliente, veículo, status e dias em aberto.</td></tr>
+    <tr><td>Contas a receber</td><td>Em aberto e vencidas, com dias de atraso.</td></tr>
+    <tr><td>Saldo do estoque em dinheiro</td><td>Peça por peça: quantidade, custo, total a custo, preço, total a venda e lucro potencial.</td></tr>
+    <tr><td>Clientes e histórico</td><td>Total comprado por cliente e data da última compra.</td></tr>
+  </table>
+
+  <img class="tela" src="img-opt/27-relatorio-mais-vendidos.jpg" alt="Relatório de produtos mais vendidos">
+  <p class="legenda">Relatório na tela, com o resumo embaixo da lista.</p>
+
+  <h3>Exportar para Excel (CSV) ou PDF</h3>
+  <ul>
+    <li><strong>CSV</strong> — abre no Excel. Os números vão sem “R$” para facilitar as somas,
+        e os acentos vêm certos.</li>
+    <li><strong>PDF</strong> — pronto para imprimir ou enviar por WhatsApp. Já sai com o nome da sua loja,
+        o período e o resumo no final.</li>
+  </ul>
+  <div class="dica">
+    O arquivo exportado é salvo na pasta <strong>Downloads</strong> do computador, com o nome do
+    relatório e a data (ex.: <span style="font-family:monospace">vendas-2026-10-29.pdf</span>).
+  </div>
+</div>
+
+<!-- ================= 15. BACKUP ================= -->
+<div class="pagina">
+  <h1>15. Backup e ajustes</h1>
+  <p>Menu <strong>Backup e Ajustes</strong>. É a parte mais importante para não perder dados.</p>
+  <img class="tela" src="img-opt/30-backup.jpg" alt="Tela de backup">
+
+  <h3>Fazer o backup do dia (1 clique)</h3>
+  <ol>
+    <li>Clique em <strong>Fazer backup agora</strong>.</li>
+    <li>O sistema cria <strong>um arquivo único</strong> (extensão .db) na pasta de backups e mostra o nome dele.</li>
+    <li>Na lista aparecem todos os backups, com data e tamanho. Use <strong>Baixar</strong> para copiar o
+        arquivo para um pen drive, para o e-mail ou para o Google Drive da loja.</li>
+  </ol>
+
+  <div class="ok">
+    <strong>Backup automático:</strong> ao abrir o programa, ele já faz <strong>um backup por dia</strong>
+    sem você pedir (pode desligar essa opção nesta tela). A faixa amarela da tela Início avisa se o
+    backup do dia ainda não foi feito.
+  </div>
+
+  <p>O sistema guarda os últimos <strong>30 backups</strong> (você pode mudar esse número) e apaga os mais
+  antigos automaticamente, para não encher o computador.</p>
+
+  <h3>Restaurar num computador limpo (o dia em que o computador quebra)</h3>
+  <ol>
+    <li>Instale o AutoPeças no computador novo (o mesmo instalador).</li>
+    <li>Abra o programa e vá em <strong>Backup e Ajustes</strong>.</li>
+    <li>Em <strong>“Restaurar backup de outro computador”</strong>, escolha o arquivo .db do backup
+        (o que você salvou no pen drive ou no Drive).</li>
+    <li>Clique em <strong>Restaurar este arquivo</strong> e confirme.</li>
+    <li>Pronto: peças, vendas, clientes, fichas, contas e ajustes voltam exatamente como estavam.</li>
+  </ol>
+
+  <div class="atencao">
+    <strong>Atenção:</strong> restaurar substitui os dados atuais pelos dados do arquivo.
+    Antes de restaurar, o sistema cria sozinho um backup de segurança
+    (“antes-de-restaurar”), então nada é perdido por engano.
+  </div>
+
+  <h3>Ajustes da loja</h3>
+  <ul>
+    <li><strong>Nome da loja</strong> — aparece no cupom e nos relatórios em PDF.</li>
+    <li><strong>CNPJ, telefone e endereço</strong> — dados da loja.</li>
+    <li><strong>Prazo padrão de faturado (dias)</strong> — usado quando a venda é a prazo.</li>
+    <li><strong>Backups a manter</strong> — quantos arquivos de backup ficam guardados.</li>
+    <li><strong>Segunda pasta de backup</strong> — opcional. Coloque aqui o caminho de um pen drive ou
+      da pasta do Google Drive da loja. Depois de cada backup, o sistema copia o mesmo arquivo para lá.
+      Se a pasta não existir (pen drive desconectado, por exemplo), o backup principal continua
+      funcionando normalmente e aparece um aviso em vermelho na tela <em>Backup e Ajustes</em>.</li>
+    <li><strong>Backup automático</strong> e <strong>permitir vender sem estoque</strong> — liga/desliga.</li>
+    <li><strong>Encerrar o sistema</strong> — desliga o programa do jeito certo. Também existe o atalho
+      <strong>“Encerrar AutoPecas”</strong> no menu Iniciar, para fechar o sistema quando a janela do
+      navegador já foi fechada.</li>
+  </ul>
+
+  <h3>Onde ficam os dados</h3>
+  <p>Os dados ficam gravados nesta pasta do computador:</p>
+  <p style="font-family:monospace;background:#f4f6f9;padding:3mm;border-radius:2mm">
+    C:\Users\<em>seu-usuário</em>\AppData\Roaming\AutoPecas
+  </p>
+  <p>Dentro dela existe o arquivo <strong>autopecas.db</strong> (todos os seus dados) e a pasta
+  <strong>backups</strong> (as cópias de segurança). Você não precisa abrir essas pastas para usar o
+  sistema — o próprio programa cuida disso.</p>
+</div>
+
+<!-- ================= 16. DUVIDAS ================= -->
+<div class="pagina">
+  <h1>16. Dúvidas frequentes e solução de problemas</h1>
+
+  <h3>O navegador diz “não foi possível acessar este site”</h3>
+  <p>A janela preta do programa foi fechada. Clique de novo no ícone <strong>AutoPeças</strong> da
+  Área de Trabalho. O sistema abre no navegador outra vez — os dados continuam salvos.</p>
+
+  <h3>Fechei o navegador sem querer. Perdi alguma coisa?</h3>
+  <p>Não. Basta abrir o programa de novo (ou digitar <span style="font-family:monospace">http://127.0.0.1:8787</span>
+  no navegador). Tudo que foi salvo continua lá.</p>
+
+  <h3>Posso usar em mais de um computador ao mesmo tempo?</h3>
+  <p>O AutoPeças foi feito para <strong>um computador</strong> (o do balcão). Para usar em outro,
+  instale lá e restaure o backup mais recente. Depois, escolha um dos dois como principal — assim
+  não existe risco de dado desencontrado.</p>
+
+  <h3>Preciso de internet?</h3>
+  <p>Não. Nem para vender, nem para o XML, nem para relatórios. Só é preciso internet se você quiser
+  copiar o backup para o Google Drive ou mandar o PDF por WhatsApp.</p>
+
+  <h3>O XML do meu fornecedor não é reconhecido</h3>
+  <p>Use o botão <strong>Analisar arquivo</strong> primeiro: ele mostra o que o sistema conseguiu ler.
+  Se os campos vierem vazios, mande um arquivo real de exemplo para o responsável pelo sistema
+  ajustar o leitor — a leitura é flexível e aceita nomes de campos diferentes.</p>
+
+  <h3>Uma peça ficou duplicada. O que faço?</h3>
+  <p>Abra a peça duplicada e clique em <strong>Inativar peça</strong>. Ela sai das buscas e o histórico
+  é mantido. O leitor de XML não duplica quando o <strong>código do fabricante</strong> está igual —
+  se o fornecedor mandar o mesmo produto com código diferente, acrescente esse código aos
+  <strong>equivalentes</strong> da peça principal para que o sistema reconheça na próxima vez.</p>
+
+  <h3>Emito nota fiscal?</h3>
+  <p>Não. O AutoPeças controla peças, estoque e vendas. O cupom que ele imprime é um comprovante interno
+  da venda (não é documento fiscal).</p>
+
+  <h3>Esqueci de dar entrada em uma compra e o estoque está errado</h3>
+  <p>Use <strong>Estoque → Ajuste</strong>, informe o saldo correto que você contou na prateleira e
+  escreva o motivo (ex.: “inventário”). O ajuste fica registrado no histórico.</p>
+
+  <h3>Posso apagar uma venda?</h3>
+  <p>Só cancelar. Uma venda cancelada devolve as peças ao estoque, sai dos totais do dia e continua
+  registrada para consulta. Assim nenhum número desaparece do histórico.</p>
+
+  <h3>Onde estão meus dados, exatamente?</h3>
+  <p>Na pasta <span style="font-family:monospace">C:\Users\<em>seu-usuário</em>\AppData\Roaming\AutoPecas</span>.
+  O arquivo <strong>autopecas.db</strong> é o seu banco de dados e a pasta <strong>backups</strong> guarda
+  as cópias. Nunca apague essa pasta sem antes copiar um backup.</p>
+
+  <h2>Resumo do dia a dia (cola para deixar no balcão)</h2>
+  <table class="simples">
+    <tr><th style="width:50%">Ação</th><th>Como</th></tr>
+    <tr><td>Abrir o programa</td><td>Clique no ícone AutoPeças (deixe a janela preta aberta)</td></tr>
+    <tr><td>Vender</td><td><kbd>F2</kbd> → buscar peça → cliente/placa → recebido → <kbd>F9</kbd></td></tr>
+    <tr><td>Cadastrar peça</td><td>Peças → + Nova peça</td></tr>
+    <tr><td>Entrada de mercadoria</td><td>Importar XML → arrastar arquivo → Importar agora</td></tr>
+    <tr><td>Cliente pediu peça que não temos</td><td><kbd>F4</kbd> → preencher → Salvar ficha</td></tr>
+    <tr><td>Comprar as faltas</td><td>Fichas de Falta → Gerar pedido por fornecedor</td></tr>
+    <tr><td>Peça chegou</td><td>Pedidos → Abrir → Receber pedido</td></tr>
+    <tr><td>Fechar o dia</td><td><kbd>F8</kbd> (Fechamento do dia) → Imprimir</td></tr>
+    <tr><td>Backup do dia</td><td>Backup e Ajustes → Fazer backup agora</td></tr>
+  </table>
+
+  <p style="margin-top:8mm;text-align:center;color:#667085;font-size:9pt">
+    AutoPeças 1.0.0 — sistema local, sem internet e sem mensalidade.<br>
+    Dúvidas: consulte este manual ou o responsável pela instalação.
+  </p>
+</div>
+
+</body>
+</html>

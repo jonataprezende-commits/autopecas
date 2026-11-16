@@ -1,0 +1,27 @@
+# binários compilados
+codigo/autopecas
+codigo/autopecas.exe
+*.exe.tmp
+/tmp/
+
+# banco / dados de execução
+*.db
+*.db-wal
+*.db-shm
+erro.log
+*.log
+
+# pasta de dados e backups locais
+backups/
+dados/
+
+# emissor/instalador: payload gerado por gerar_payload.py
+instalador/payload/
+
+# editores / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc

@@ -1,0 +1,26 @@
+[
+  {
+    "foto": "boa",
+    "itens": 8,
+    "qtd_ok": 8,
+    "valor_ok": 8,
+    "total_nota_lido": null,
+    "conf_media": 91.4
+  },
+  {
+    "foto": "media",
+    "itens": 8,
+    "qtd_ok": 0,
+    "valor_ok": 0,
+    "total_nota_lido": null,
+    "conf_media": 74.4
+  },
+  {
+    "foto": "ruim",
+    "itens": 8,
+    "qtd_ok": 0,
+    "valor_ok": 0,
+    "total_nota_lido": null,
+    "conf_media": 65.3
+  }
+]

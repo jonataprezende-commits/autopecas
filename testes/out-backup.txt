@@ -1,0 +1,20 @@
+   (dados de demonstracao recriados)
+=== 1. estado atual (maquina da loja) ===
+   {'pecas': 15, 'vendas': 10, 'fichas': 6, 'clientes': 5, 'fornecedores': 4, 'receber': 3, 'estoque_custo': 460310}
+=== 2. backup de hoje (1 clique) ===
+   arquivo: backup-2026-10-29_1504.db | tamanho: 156 KB
+   copiado para o 'pen drive': /home/user/qa/pendrive/backup-da-loja.db 156 KB
+=== 3. simulando computador limpo (apaga TODA a pasta de dados) ===
+   pasta de dados existe? False
+=== 4. reinstalando o programa no 'computador novo' (instalador silencioso) ===
+   programa instalado: True
+=== 5. abrindo o sistema limpo (banco novo, vazio) ===
+   estado do computador limpo: {'pecas': 0, 'vendas': 0, 'fichas': 0, 'clientes': 0, 'fornecedores': 0, 'receber': 0, 'estoque_custo': 0}
+=== 6. restaurando o backup (enviando o arquivo, como no manual) ===
+   resposta: {"ok":true,"pecas":15,"seguranca":"antes-de-restaurar-2026-10-29_1504.db"}
+
+   estado depois da restauracao: {'pecas': 15, 'vendas': 10, 'fichas': 6, 'clientes': 5, 'fornecedores': 4, 'receber': 3, 'estoque_custo': 460310}
+=== 7. comparacao final ===
+   dados identicos ao original? SIM ✅
+
+CRITERIO 5 OK: backup de hoje + restauracao em computador limpo deixou tudo igual.
