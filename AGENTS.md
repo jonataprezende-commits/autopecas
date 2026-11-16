@@ -50,4 +50,6 @@ gofmt -w <arquivo>.go
 
 - Custo médio ponderado implementado e coberto por testes.
 - CI em `.github/workflows/ci.yml` (build + vet + testes).
+- Front: overlay de carregando `#overlay-carregando`; use `comCarregando(() => fetch(...))`
+  em qualquer chamada nova que possa demorar (o `api()` já faz isso).
 - Backlog em `CHANGELOG.md` (caixa/turno, devolução parcial, NFC-e etc.).

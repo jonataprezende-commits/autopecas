@@ -308,7 +308,7 @@ func instalar() error {
 	return nil
 }
 
-const leiaMe = "AutoPecas 1.0.11 - sistema de gestao para loja de autopecas\r\n" +
+const leiaMe = "AutoPecas 1.0.12 - sistema de gestao para loja de autopecas\r\n" +
 	"=========================================================\r\n\r\n" +
 	"COMO ABRIR\r\n" +
 	"1. Clique duas vezes no atalho 'AutoPecas' da Area de Trabalho.\r\n" +
@@ -379,7 +379,7 @@ func wndProc(hwnd syscall.Handle, msg uint32, wParam, lParam uintptr) uintptr {
 			if err := instalar(); err != nil {
 				msgBox("Erro na instalacao", err.Error(), mbIconError)
 				pEnableWindow.Call(uintptr(hwnd), 1)
-				pSetWindowTextW.Call(uintptr(hwnd), uintptr(unsafe.Pointer(u16("Instalacao do AutoPecas 1.0.11"))))
+				pSetWindowTextW.Call(uintptr(hwnd), uintptr(unsafe.Pointer(u16("Instalacao do AutoPecas 1.0.12"))))
 				return 0
 			}
 			r := msgBox("Instalacao concluida",
@@ -455,7 +455,7 @@ func main() {
 	estilo := uintptr(wsOverlappedWindow)
 	hwnd, _, _ := pCreateWindowExW.Call(0,
 		uintptr(unsafe.Pointer(className)),
-		uintptr(unsafe.Pointer(u16("Instalacao do AutoPecas 1.0.11"))),
+		uintptr(unsafe.Pointer(u16("Instalacao do AutoPecas 1.0.12"))),
 		estilo,
 		170, 110, 600, 340,
 		0, 0, uintptr(hInst), 0)
@@ -464,7 +464,7 @@ func main() {
 	// icone da janela / cursor padrao
 	user32.NewProc("LoadCursorW").Call(0, idcArrow)
 
-	criarLabel(hMain, "AutoPecas 1.0.11", 28, 22, 480, 30, true, true)
+	criarLabel(hMain, "AutoPecas 1.0.12", 28, 22, 480, 30, true, true)
 	criarLabel(hMain, "Sistema de gestao para loja de autopecas - 100% offline", 30, 56, 500, 22, false, false)
 	criarLabel(hMain, "Este assistente vai instalar o programa neste computador:", 30, 92, 500, 20, false, false)
 	criarLabel(hMain, pastaDestino(), 30, 114, 500, 20, false, false)

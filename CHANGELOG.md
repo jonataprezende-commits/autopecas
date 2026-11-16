@@ -4,7 +4,7 @@ Todas as mudanças relevantes do AutoPecas. O formato segue o
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o versionamento
 segue o [SemVer](https://semver.org/lang/pt-BR/).
 
-## [1.0.12] - Não lançado
+## [1.0.12] - 2026-11-16
 
 ### Adicionado
 
@@ -25,6 +25,10 @@ segue o [SemVer](https://semver.org/lang/pt-BR/).
   ler foto de nota, backup). Aparece só se a resposta passar de 250 ms — em
   chamadas instantâneas a tela não pisca — e some ao terminar. Vale para toda
   chamada feita pelo `api()` do front e para os envios de arquivo.
+- **Instalador reprodutível** (`instalador/gerar_instalador.ps1`): compila o
+  programa, compacta programa + manual e monta o `AutoPecas-Setup-<versão>.exe`
+  em um comando. O `gerar_payload.py` deixou de depender de caminho fixo e
+  aceita `--programa`, `--manual` e `--saida`.
 - Campo `custo_medio_centavos` na resposta da API de peças.
 - Testes: `TestCustoMedioPonderado`, `TestCustoParaValoracao`,
   `TestEntradaDeCompraAtualizaCustoMedio`, `TestRelatorioEstoqueUsaCustoMedio`,

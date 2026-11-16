@@ -25,3 +25,6 @@ instalador/payload/
 Thumbs.db
 __pycache__/
 *.pyc
+
+# saida de build (instalador/programa compilado)
+dist/
