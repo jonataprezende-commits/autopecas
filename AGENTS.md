@@ -28,6 +28,10 @@ go test -run TestNome ./...
 gofmt -w <arquivo>.go
 ```
 
+Instalador (na raiz do repo): `powershell -ExecutionPolicy Bypass -File instalador\gerar_instalador.ps1`
+→ `dist\AutoPecas.exe` + `dist\AutoPecas-Setup-<versão>.exe` (versão lida de `codigo/main.go`).
+Teste sem sujar o PC: rodar o setup com `LOCALAPPDATA`/`APPDATA`/`USERPROFILE` apontando para uma pasta temporária e `-silencioso`/`/S`.
+
 ## Convenções e decisões
 
 - **Nunca perder dados**: migrações são idempotentes e numeradas em
@@ -52,4 +56,7 @@ gofmt -w <arquivo>.go
 - CI em `.github/workflows/ci.yml` (build + vet + testes).
 - Front: overlay de carregando `#overlay-carregando`; use `comCarregando(() => fetch(...))`
   em qualquer chamada nova que possa demorar (o `api()` já faz isso).
+- **Release v1.0.12 publicada** (tag `v1.0.12`, commit `23f6ef4`) com
+  `AutoPecas-Setup-1.0.12.exe` (19,8 MB). Instalador gerado por
+  `instalador/gerar_instalador.ps1` — `dist/` fica fora do git.
 - Backlog em `CHANGELOG.md` (caixa/turno, devolução parcial, NFC-e etc.).
