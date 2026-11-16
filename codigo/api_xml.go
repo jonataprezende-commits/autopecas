@@ -912,9 +912,9 @@ func (a *App) createPartFromXML(it xmlItem, custo, preco int64, qtd float64, opt
 		if stock < 0 {
 			stock = 0
 		}
-		res, err := tx.Exec(`INSERT INTO parts(code,code_norm,mfr_code,mfr_norm,description,brand,category,application,cost_cents,price_cents,min_stock,stock,location,supplier_id,active,search_blob,created_at,updated_at)
-			VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?,?,?)`,
-			c, normCode(c), it.CodFab, normCode(it.CodFab), it.Descricao, it.Marca, it.Categoria, it.Aplicacao, custo, preco, 1, stock, it.Local, opts.FornecedorID, blob, nowISO(), nowISO())
+		res, err := tx.Exec(`INSERT INTO parts(code,code_norm,mfr_code,mfr_norm,description,brand,category,application,cost_cents,avg_cost_cents,price_cents,min_stock,stock,location,supplier_id,active,search_blob,created_at,updated_at)
+			VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?,?,?)`,
+			c, normCode(c), it.CodFab, normCode(it.CodFab), it.Descricao, it.Marca, it.Categoria, it.Aplicacao, custo, custo, preco, 1, stock, it.Local, opts.FornecedorID, blob, nowISO(), nowISO())
 		if err != nil {
 			return err
 		}
@@ -937,14 +937,20 @@ func (a *App) createPartFromXML(it xmlItem, custo, preco int64, qtd float64, opt
 
 func (a *App) updatePartFromXML(id int64, it xmlItem, custo, preco int64, qtd float64, opts importOptions) error {
 	return a.db.Tx(func(tx *sql.Tx) error {
-		var curCusto, curPreco int64
+		var curCusto, curPreco, curAvg int64
 		var curDesc, curMfr, curBrand, curCat, curLoc, curCode, blobAtual, curApp string
 		var curStock float64
-		if err := tx.QueryRow(`SELECT cost_cents,price_cents,description,IFNULL(mfr_code,''),brand,category,location,stock,code,search_blob,IFNULL(application,'') FROM parts WHERE id=?`, id).
-			Scan(&curCusto, &curPreco, &curDesc, &curMfr, &curBrand, &curCat, &curLoc, &curStock, &curCode, &blobAtual, &curApp); err != nil {
+		if err := tx.QueryRow(`SELECT cost_cents,price_cents,avg_cost_cents,description,IFNULL(mfr_code,''),brand,category,location,stock,code,search_blob,IFNULL(application,'') FROM parts WHERE id=?`, id).
+			Scan(&curCusto, &curPreco, &curAvg, &curDesc, &curMfr, &curBrand, &curCat, &curLoc, &curStock, &curCode, &blobAtual, &curApp); err != nil {
 			return err
 		}
 		if opts.AtualizarCusto && custo > 0 {
+			// 1.0.12: nota de compra que da entrada no estoque atualiza a media
+			// ponderada. Atualizacao de custo sem entrada (so preco de referencia)
+			// nao mexe na media, para nao distorcer o custo real do estoque.
+			if opts.AtualizarEstoque && !opts.SobrescreverEstoque && qtd > 0 {
+				curAvg = calcularCustoMedio(curAvg, curStock, custo, qtd)
+			}
 			curCusto = custo
 		}
 		if opts.AtualizarPreco && preco > 0 {
@@ -993,8 +999,8 @@ func (a *App) updatePartFromXML(id int64, it xmlItem, custo, preco int64, qtd fl
 			rows.Close()
 		}
 		blob := buildSearchBlobApp(curCode, curMfr, curDesc, curBrand, curCat, curLoc, curApp, eqs)
-		if _, err := tx.Exec(`UPDATE parts SET cost_cents=?,price_cents=?,mfr_code=?,mfr_norm=?,brand=?,category=?,location=?,description=?,application=?,search_blob=?,updated_at=? WHERE id=?`,
-			curCusto, curPreco, curMfr, normCode(curMfr), curBrand, curCat, curLoc, curDesc, curApp, blob, nowISO(), id); err != nil {
+		if _, err := tx.Exec(`UPDATE parts SET cost_cents=?,avg_cost_cents=?,price_cents=?,mfr_code=?,mfr_norm=?,brand=?,category=?,location=?,description=?,application=?,search_blob=?,updated_at=? WHERE id=?`,
+			curCusto, curAvg, curPreco, curMfr, normCode(curMfr), curBrand, curCat, curLoc, curDesc, curApp, blob, nowISO(), id); err != nil {
 			return err
 		}
 		if opts.AtualizarEstoque {

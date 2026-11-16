@@ -53,9 +53,9 @@ func (a *App) handleStockMove(w http.ResponseWriter, r *http.Request) {
 
 	err := a.db.Tx(func(tx *sql.Tx) error {
 		var bal float64
-		var cost int64
+		var cost, avg int64
 		var desc string
-		if err := tx.QueryRow(`SELECT stock,cost_cents,description FROM parts WHERE id=?`, in.PartID).Scan(&bal, &cost, &desc); err != nil {
+		if err := tx.QueryRow(`SELECT stock,cost_cents,avg_cost_cents,description FROM parts WHERE id=?`, in.PartID).Scan(&bal, &cost, &avg, &desc); err != nil {
 			return fmt.Errorf("peca nao encontrada")
 		}
 		delta := 0.0
@@ -75,7 +75,13 @@ func (a *App) handleStockMove(w http.ResponseWriter, r *http.Request) {
 		}
 		if in.Custo > 0 {
 			cost = in.Custo
-			if _, err := tx.Exec(`UPDATE parts SET cost_cents=? WHERE id=?`, in.Custo, in.PartID); err != nil {
+			// 1.0.12: entrada de compra atualiza o custo medio ponderado. A
+			// media considera o estoque ANTES desta entrada (bal) e a quantidade
+			// que esta entrando (delta). "ajuste"/"saida" nao mexem no custo.
+			if in.Tipo == "entrada" && delta > 0 {
+				avg = calcularCustoMedio(avg, bal, in.Custo, delta)
+			}
+			if _, err := tx.Exec(`UPDATE parts SET cost_cents=?,avg_cost_cents=? WHERE id=?`, in.Custo, avg, in.PartID); err != nil {
 				return err
 			}
 		}

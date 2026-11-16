@@ -22,6 +22,7 @@ type Part struct {
 	Marca        string  `json:"marca"`
 	Categoria    string  `json:"categoria"`
 	Custo        int64   `json:"custo_centavos"`
+	CustoMedio   int64   `json:"custo_medio_centavos"`
 	Preco        int64   `json:"preco_centavos"`
 	Minimo       float64 `json:"minimo"`
 	Estoque      float64 `json:"estoque"`
@@ -37,14 +38,14 @@ type Part struct {
 }
 
 const partCols = `p.id,p.code,p.mfr_code,p.description,p.brand,p.category,IFNULL(p.application,''),
-p.cost_cents,p.price_cents,p.min_stock,p.stock,p.location,p.supplier_id,IFNULL(s.name,''),p.active,
+p.cost_cents,p.avg_cost_cents,p.price_cents,p.min_stock,p.stock,p.location,p.supplier_id,IFNULL(s.name,''),p.active,
 p.created_at,p.updated_at`
 
 func scanPart(rows interface{ Scan(...any) error }) (Part, error) {
 	var p Part
 	var ativo int
 	err := rows.Scan(&p.ID, &p.Codigo, &p.CodFab, &p.Descricao, &p.Marca, &p.Categoria, &p.Aplicacao,
-		&p.Custo, &p.Preco, &p.Minimo, &p.Estoque, &p.Local, &p.FornecedorID, &p.Fornecedor, &ativo, &p.Criado, &p.Atualizado)
+		&p.Custo, &p.CustoMedio, &p.Preco, &p.Minimo, &p.Estoque, &p.Local, &p.FornecedorID, &p.Fornecedor, &ativo, &p.Criado, &p.Atualizado)
 	p.Ativo = ativo == 1
 	p.AbaixoMinimo = p.Estoque <= p.Minimo
 	p.Equivalentes = []Equiv{}
@@ -156,7 +157,7 @@ func (a *App) handleListParts(w http.ResponseWriter, r *http.Request) {
 			var ativo int
 			var rank int
 			if err := rows.Scan(&p.ID, &p.Codigo, &p.CodFab, &p.Descricao, &p.Marca, &p.Categoria, &p.Aplicacao,
-				&p.Custo, &p.Preco, &p.Minimo, &p.Estoque, &p.Local, &p.FornecedorID, &p.Fornecedor, &ativo, &p.Criado, &p.Atualizado, &rank); err != nil {
+				&p.Custo, &p.CustoMedio, &p.Preco, &p.Minimo, &p.Estoque, &p.Local, &p.FornecedorID, &p.Fornecedor, &ativo, &p.Criado, &p.Atualizado, &rank); err != nil {
 				errBusca = err
 				break
 			}
@@ -305,9 +306,9 @@ func (a *App) handleSavePart(w http.ResponseWriter, r *http.Request) {
 
 	err = a.db.Tx(func(tx *sql.Tx) error {
 		if id == 0 {
-			res, err := tx.Exec(`INSERT INTO parts(code,code_norm,mfr_code,mfr_norm,description,brand,category,application,cost_cents,price_cents,min_stock,stock,location,supplier_id,active,search_blob,created_at,updated_at)
-				VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, in.Codigo, normCode(in.Codigo), in.CodFab, normCode(in.CodFab), in.Descricao, in.Marca, in.Categoria,
-				in.Aplicacao, in.Custo, in.Preco, in.Minimo, in.Estoque, in.Local, in.FornecedorID, ativo, blob, nowISO(), nowISO())
+			res, err := tx.Exec(`INSERT INTO parts(code,code_norm,mfr_code,mfr_norm,description,brand,category,application,cost_cents,avg_cost_cents,price_cents,min_stock,stock,location,supplier_id,active,search_blob,created_at,updated_at)
+				VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, in.Codigo, normCode(in.Codigo), in.CodFab, normCode(in.CodFab), in.Descricao, in.Marca, in.Categoria,
+				in.Aplicacao, in.Custo, in.Custo, in.Preco, in.Minimo, in.Estoque, in.Local, in.FornecedorID, ativo, blob, nowISO(), nowISO())
 			if err != nil {
 				return err
 			}
@@ -321,11 +322,17 @@ func (a *App) handleSavePart(w http.ResponseWriter, r *http.Request) {
 		} else {
 			// mantem o estoque atual; ajuste de estoque e feito pelo modulo de estoque
 			var atual float64
-			if err := tx.QueryRow(`SELECT stock FROM parts WHERE id=?`, id).Scan(&atual); err != nil {
+			var avg int64
+			if err := tx.QueryRow(`SELECT stock,avg_cost_cents FROM parts WHERE id=?`, id).Scan(&atual, &avg); err != nil {
 				return err
 			}
-			if _, err := tx.Exec(`UPDATE parts SET code=?,code_norm=?,mfr_code=?,mfr_norm=?,description=?,brand=?,category=?,application=?,cost_cents=?,price_cents=?,min_stock=?,location=?,supplier_id=?,active=?,search_blob=?,updated_at=? WHERE id=?`,
-				in.Codigo, normCode(in.Codigo), in.CodFab, normCode(in.CodFab), in.Descricao, in.Marca, in.Categoria, in.Aplicacao, in.Custo, in.Preco, in.Minimo, in.Local, in.FornecedorID, ativo, blob, nowISO(), id); err != nil {
+			// edicao manual nao recalcula a media (nao houve compra). So preenche
+			// quando a peca ainda nao tem media registrada.
+			if avg == 0 && in.Custo > 0 {
+				avg = in.Custo
+			}
+			if _, err := tx.Exec(`UPDATE parts SET code=?,code_norm=?,mfr_code=?,mfr_norm=?,description=?,brand=?,category=?,application=?,cost_cents=?,avg_cost_cents=?,price_cents=?,min_stock=?,location=?,supplier_id=?,active=?,search_blob=?,updated_at=? WHERE id=?`,
+				in.Codigo, normCode(in.Codigo), in.CodFab, normCode(in.CodFab), in.Descricao, in.Marca, in.Categoria, in.Aplicacao, in.Custo, avg, in.Preco, in.Minimo, in.Local, in.FornecedorID, ativo, blob, nowISO(), id); err != nil {
 				return err
 			}
 		}
@@ -464,7 +471,7 @@ func (a *App) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	_ = a.db.QueryRow(`SELECT IFNULL(SUM(amount_cents),0) FROM payables WHERE status='aberto'`).Scan(&pagasAberto)
 
 	var estoqueValor int64
-	_ = a.db.QueryRow(`SELECT CAST(ROUND(IFNULL(SUM(stock*cost_cents),0)) AS INTEGER) FROM parts WHERE active=1`).Scan(&estoqueValor)
+	_ = a.db.QueryRow(`SELECT CAST(ROUND(IFNULL(SUM(stock*COALESCE(NULLIF(avg_cost_cents,0),cost_cents)),0)) AS INTEGER) FROM parts WHERE active=1`).Scan(&estoqueValor)
 	var totalPecas int
 	_ = a.db.QueryRow(`SELECT COUNT(*) FROM parts WHERE active=1`).Scan(&totalPecas)
 

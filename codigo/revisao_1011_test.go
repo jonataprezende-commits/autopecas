@@ -15,6 +15,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -114,6 +115,12 @@ func TestTrocaDeEnderecoMantemProgramaNoAr(t *testing.T) {
 // novo não puder ser aberto, o programa volta ao endereço antigo e continua no
 // ar (antes ele simplesmente morria).
 func TestSoltarListenerNaoDerrubaOServidor(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		// No Windows um bind para 0.0.0.0:porta continua funcionando mesmo com
+		// 127.0.0.2:porta ocupado (o SO nao recusa o wildcard), entao o cenario
+		// de "porta ocupada" deste teste nao existe aqui. No Linux/Mac (CI) ele roda.
+		t.Skip("Windows nao recusa bind em 0.0.0.0 com outro IP da mesma porta ocupado")
+	}
 	porta := portaLocalLivre(t)
 	ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", porta))
 	if err != nil {

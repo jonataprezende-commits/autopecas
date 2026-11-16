@@ -477,13 +477,16 @@ func (a *App) handleReceiveOrder(w http.ResponseWriter, r *http.Request) {
 			}
 			if pid > 0 {
 				var bal float64
-				var cost int64
-				if err := tx.QueryRow(`SELECT stock,cost_cents FROM parts WHERE id=?`, pid).Scan(&bal, &cost); err != nil {
+				var cost, avg int64
+				if err := tx.QueryRow(`SELECT stock,cost_cents,avg_cost_cents FROM parts WHERE id=?`, pid).Scan(&bal, &cost, &avg); err != nil {
 					return erroRecebimento{fmt.Sprintf("a peça %d do item \"%s\" não existe mais no cadastro. Nada foi recebido — corrija o pedido e tente de novo.", pid, x.desc)}
 				}
 				if x.cost > 0 {
+					// 1.0.12: o recebimento de compra alimenta o custo medio
+					// ponderado (estoque anterior + quantidade recebida).
+					avg = calcularCustoMedio(avg, bal, x.cost, x.qty)
 					cost = x.cost
-					if _, err := tx.Exec(`UPDATE parts SET cost_cents=? WHERE id=?`, x.cost, pid); err != nil {
+					if _, err := tx.Exec(`UPDATE parts SET cost_cents=?,avg_cost_cents=? WHERE id=?`, x.cost, avg, pid); err != nil {
 						return err
 					}
 				}

@@ -139,7 +139,7 @@ func (a *App) buildReport(tipo string, q url.Values) (*Report, error) {
 		r.Colunas = []Column{{"codigo", "Codigo", "L", 70}, {"descricao", "Descricao", "L", 175}, {"marca", "Marca", "L", 70},
 			{"estoque", "Estoque", "R", 55}, {"minimo", "Minimo", "R", 55}, {"comprar", "Comprar", "R", 55},
 			{"custo", "Custo un.", "R", 70}}
-		rows, err := a.db.Query(`SELECT p.code,p.description,p.brand,p.stock,p.min_stock,p.cost_cents
+		rows, err := a.db.Query(`SELECT p.code,p.description,p.brand,p.stock,p.min_stock,COALESCE(NULLIF(p.avg_cost_cents,0),p.cost_cents)
 			FROM parts p WHERE p.active=1 AND p.stock<=p.min_stock ORDER BY (p.min_stock-p.stock) DESC, p.description`)
 		if err != nil {
 			return nil, err
@@ -277,7 +277,7 @@ func (a *App) buildReport(tipo string, q url.Values) (*Report, error) {
 		r.Subtitulo = "Valores a preco de custo e de venda"
 		r.Colunas = []Column{{"codigo", "Codigo", "L", 70}, {"descricao", "Descricao", "L", 165}, {"estoque", "Estoque", "R", 55},
 			{"custo", "Custo un.", "R", 70}, {"total_custo", "Total custo", "R", 85}, {"venda", "Venda un.", "R", 70}, {"total_venda", "Total venda", "R", 85}}
-		rows, err := a.db.Query(`SELECT code,description,stock,cost_cents,price_cents FROM parts WHERE active=1 AND stock>0 ORDER BY description`)
+		rows, err := a.db.Query(`SELECT code,description,stock,COALESCE(NULLIF(avg_cost_cents,0),cost_cents),price_cents FROM parts WHERE active=1 AND stock>0 ORDER BY description`)
 		if err != nil {
 			return nil, err
 		}

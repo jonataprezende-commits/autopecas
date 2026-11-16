@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  go:
+    name: build, vet e testes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: codigo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: codigo/go.mod
+          cache-dependency-path: codigo/go.sum
+
+      - name: Baixar dependencias
+        run: go mod download
+
+      - name: Compilar
+        run: go build ./...
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: Testes
+        run: go test ./...
+        timeout-minutes: 20

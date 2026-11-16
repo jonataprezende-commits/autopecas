@@ -106,8 +106,11 @@ func TestItem10Banco100MigraSemPerderDados(t *testing.T) {
 	}
 	env := &ambiente{t: t, app: app, dir: dir}
 
-	if v := versaoBanco(t, env); v != 6 {
-		t.Errorf("user_version = %d, esperado 6", v)
+	if v := versaoBanco(t, env); v != versaoEsquema {
+		t.Errorf("user_version = %d, esperado %d", v, versaoEsquema)
+	}
+	if !temColuna(t, env, "parts", "avg_cost_cents") {
+		t.Errorf("coluna parts.avg_cost_cents (custo medio) nao foi criada na migracao 7")
 	}
 	if !temColuna(t, env, "order_items", "received_at") {
 		t.Errorf("coluna order_items.received_at nao foi criada")
@@ -165,8 +168,8 @@ func TestItem10Banco100MigraSemPerderDados(t *testing.T) {
 	if err := app.migrate(); err != nil {
 		t.Fatalf("segunda migracao falhou: %v", err)
 	}
-	if v := versaoBanco(t, env); v != 6 {
-		t.Errorf("user_version depois da segunda migracao = %d, esperado 6", v)
+	if v := versaoBanco(t, env); v != versaoEsquema {
+		t.Errorf("user_version depois da segunda migracao = %d, esperado %d", v, versaoEsquema)
 	}
 	if got := env.qint(`SELECT COUNT(*) FROM parts`); got != 1 {
 		t.Errorf("dados alterados na segunda migracao: pecas=%d", got)
@@ -178,8 +181,11 @@ func TestItem10Banco100MigraSemPerderDados(t *testing.T) {
 
 func TestItem10BancoNovoJaNasceNaVersaoAtual(t *testing.T) {
 	env := novaAppTeste(t)
-	if v := versaoBanco(t, env); v != 6 {
-		t.Errorf("banco novo com user_version %d, esperado 6", v)
+	if v := versaoBanco(t, env); v != versaoEsquema {
+		t.Errorf("banco novo com user_version %d, esperado %d", v, versaoEsquema)
+	}
+	if !temColuna(t, env, "parts", "avg_cost_cents") {
+		t.Errorf("banco novo sem a coluna parts.avg_cost_cents")
 	}
 	if !temColuna(t, env, "order_items", "received_at") {
 		t.Errorf("banco novo sem a coluna order_items.received_at")

@@ -27,7 +27,7 @@ import (
 var webFS embed.FS
 
 const appName = "AutoPecas"
-const appVersion = "1.0.11"
+const appVersion = "1.0.12"
 
 type App struct {
 	db  *DB

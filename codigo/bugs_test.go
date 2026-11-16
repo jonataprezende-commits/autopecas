@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -277,7 +278,14 @@ func TestBugMilharNaImportacaoXML(t *testing.T) {
 
 func TestBugPrecoDoXMLNFeNaoImportado(t *testing.T) {
 	env := novaAppTeste(t)
-	dados := env.lerArquivo("/home/user/ENTREGA/exemplos-xml/exemplo-nfe-fornecedor.xml")
+	// o arquivo de exemplo vive na pasta "entrega" do repositorio, um nivel
+	// acima do pacote Go (onde o "go test" roda). O caminho absoluto antigo
+	// (/home/user/...) so existia na maquina de quem escreveu o teste.
+	caminho := "../entrega/exemplos-xml/exemplo-nfe-fornecedor.xml"
+	dados, err := os.ReadFile(caminho)
+	if err != nil {
+		t.Skipf("arquivo de exemplo nao encontrado em %s: %v", caminho, err)
+	}
 	r := env.enviarArquivoOpcoes("/api/xml/importar", "exemplo-nfe-fornecedor.xml", dados, `{"preco_xml_eh_custo":false}`)
 	if r.status != 200 {
 		t.Fatalf("importar XML de exemplo: %d %s", r.status, r.corpo)

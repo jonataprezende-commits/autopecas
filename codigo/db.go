@@ -23,11 +23,40 @@ func OpenDB(path string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	sdb.SetMaxOpenConns(1)
+	// 1.0.12: com WAL, leituras nao bloqueiam escritas. Quatro conexoes deixam
+	// a tela (varias abas + backup) responder sem enfileirar atras de uma unica
+	// conexao. O busy_timeout de 8s no DSN cobre a disputa pela escrita.
+	sdb.SetMaxOpenConns(4)
 	if err := sdb.Ping(); err != nil {
 		return nil, err
 	}
 	return &DB{sql: sdb}, nil
+}
+
+// calcularCustoMedio devolve o custo medio ponderado (em centavos) depois de
+// uma entrada de compra. Estoque zerado/negativo: o preco da compra passa a ser
+// o custo medio. Entrada sem custo informado nao altera a media.
+//
+//	novo = (avg_atual*qtd_atual + custo_novo*qtd_entrada) / (qtd_atual+qtd_entrada)
+func calcularCustoMedio(avgAtual int64, qtdAtual float64, custoNovo int64, qtdEntrada float64) int64 {
+	if qtdEntrada <= 0 || custoNovo <= 0 {
+		return avgAtual
+	}
+	if qtdAtual <= 0 || avgAtual <= 0 {
+		return custoNovo
+	}
+	total := float64(avgAtual)*qtdAtual + float64(custoNovo)*qtdEntrada
+	media := total / (qtdAtual + qtdEntrada)
+	return int64(media + 0.5) // arredondamento para o centavo mais proximo
+}
+
+// custoParaValoracao: valor do estoque usa o custo medio quando conhecido e cai
+// para o ultimo custo de compra quando a peca nunca teve entrada (avg = 0).
+func custoParaValoracao(avg, ultimo int64) int64 {
+	if avg > 0 {
+		return avg
+	}
+	return ultimo
 }
 
 func (d *DB) Close() error { return d.sql.Close() }
@@ -345,7 +374,8 @@ func criarIndiceBuscaCatalogo(tx *sql.Tx) error {
 // 4 = coluna catalog.criteria (criterios tecnicos: rosca, dentes, altura...)
 // 5 = indice catalog_fts (busca instantanea com catalogo grande)
 // 6 = payables (contas a pagar), notas_entrada (nota importada) e suppliers.doc
-const versaoEsquema = 6
+// 7 = parts.avg_cost_cents (custo medio ponderado das compras)
+const versaoEsquema = 7
 
 func (a *App) userVersion() (int, error) {
 	var v int
@@ -512,6 +542,19 @@ func (a *App) aplicarMigracao(n int) error {
 			// CNPJ do fornecedor: e por ele que a nota encontra o fornecedor
 			// certo sem duplicar cadastro
 			if err := colunaSeFaltar(tx, "suppliers", "doc", `TEXT DEFAULT ''`); err != nil {
+				return err
+			}
+		case 7:
+			// custo medio ponderado: o custo "de compra" (cost_cents) continua
+			// sendo o ultimo preco pago; avg_cost_cents guarda a media real de
+			// todas as entradas. Relatorios e margem passam a usar a media.
+			if err := colunaSeFaltar(tx, "parts", "avg_cost_cents", `INTEGER NOT NULL DEFAULT 0`); err != nil {
+				return err
+			}
+			// pecas que ja existem: a media comeca no ultimo custo conhecido,
+			// para o relatorio nao mostrar zero ate a proxima compra.
+			if _, err := tx.Exec(`UPDATE parts SET avg_cost_cents=cost_cents
+				WHERE avg_cost_cents=0 AND cost_cents>0`); err != nil {
 				return err
 			}
 		default:
