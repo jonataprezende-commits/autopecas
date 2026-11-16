@@ -10,6 +10,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -317,6 +318,11 @@ func TestOcrImportarCriaPecaNova(t *testing.T) {
 
 // TestOcrLerNaoGravaNada: ler a foto nao pode mexer no banco.
 func TestOcrLerNaoGravaNada(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		// O motor de OCR embutido é um tesseract.exe (Windows). No Linux/Mac do
+		// CI ele existe no cache mas não executa ("exec format error").
+		t.Skip("motor de OCR embutido é binário Windows; fora do Windows não roda")
+	}
 	if !motorDisponivel() {
 		t.Skip("motor de OCR nao instalado nesta maquina (teste do caminho completo)")
 	}
@@ -339,6 +345,9 @@ func TestOcrLerNaoGravaNada(t *testing.T) {
 // TestOcrFotoBoaCaminhoCompleto: foto -> OCR -> itens. Prova que o pipeline de
 // imagem + motor embutido funciona de verdade (pulado se nao houver motor).
 func TestOcrFotoBoaCaminhoCompleto(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("motor de OCR embutido é binário Windows; fora do Windows não roda")
+	}
 	if !motorDisponivel() {
 		t.Skip("motor de OCR nao instalado nesta maquina")
 	}
