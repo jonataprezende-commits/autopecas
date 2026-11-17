@@ -1859,6 +1859,366 @@ async function testarPastaNuvem() {
 }
 window.testarPastaNuvem = testarPastaNuvem;
 
+/* ================= ESTOQUE INTELIGENTE (v1.1) ================= */
+
+let EI_ABA_ATIVA = "sugestoes";
+let EI_PERIODO = { de1: "", ate1: "", de2: "", ate2: "" };
+
+ROTAS.ei = async function () {
+  EI_ABA_ATIVA = "sugestoes";
+  const hojeStr = hoje();
+  const trintaAtras = diasAtras(30);
+  const sessentaAtras = diasAtras(60);
+  $("#conteudo").innerHTML = `
+  <div class="topo">
+    <div><h1>Estoque Inteligente</h1><p class="sub">Demanda, ponto de reposição, estoque parado, Curva ABC e comparação de períodos</p></div>
+    <div class="acoes">
+      <button class="btn" onclick="abrirConfigEI()">⚙ Configurações</button>
+      <button class="btn primario" onclick="abrirGerarPedidoEI()">Gerar pedido de compra</button>
+    </div>
+  </div>
+  <div class="pill-tabs" id="ei-tabs">
+    <button data-aba="sugestoes" class="ativo">📋 Sugestões de compra</button>
+    <button data-aba="parados">📦 Estoque parado</button>
+    <button data-aba="abc">📊 Curva ABC</button>
+    <button data-aba="comparar">📈 Comparar períodos</button>
+    <button data-aba="resumo">📌 Resumo</button>
+  </div>
+  <div class="painel" id="ei-corpo"><div class="vazio">Carregando…</div></div>`;
+
+  $$("#ei-tabs button").forEach(b => {
+    b.onclick = () => {
+      $$("#ei-tabs button").forEach(x => x.classList.remove("ativo"));
+      b.classList.add("ativo");
+      EI_ABA_ATIVA = b.dataset.aba;
+      carregarEI();
+    };
+  });
+  await carregarEI();
+};
+
+async function carregarEI() {
+  const alvo = $("#ei-corpo");
+  if (!alvo) return;
+  alvo.innerHTML = '<div class="vazio">Carregando…</div>';
+  try {
+    switch (EI_ABA_ATIVA) {
+      case "sugestoes": await carregarEISugestoes(); break;
+      case "parados": await carregarEIParados(); break;
+      case "abc": await carregarEIABC(); break;
+      case "comparar": await carregarEIComparar(); break;
+      case "resumo": await carregarEIResumo(); break;
+    }
+  } catch (e) {
+    alvo.innerHTML = '<div class="erro-box">' + esc(e.message) + "</div>";
+  }
+}
+
+async function carregarEISugestoes() {
+  const alvo = $("#ei-corpo");
+  const r = await api("/estoque-inteligente/sugestoes");
+  if (!r.itens.length) {
+    alvo.innerHTML = '<div class="vazio">Nenhuma sugestão de compra no momento.<br><span class="small">Peças aparecem aqui quando o estoque atinge o ponto de reposição ou fica abaixo do mínimo.</span></div>';
+    return;
+  }
+  alvo.innerHTML = `
+    <div class="topo" style="margin-bottom:10px">
+      <div class="acoes" style="flex:1">
+        <button class="btn" onclick="exportarEI('sugestoes','csv')">⬇ CSV</button>
+        <button class="btn" onclick="exportarEI('sugestoes','pdf')">⬇ PDF</button>
+        <button class="btn primario" onclick="abrirGerarPedidoEI()">Gerar pedido com estas sugestões</button>
+      </div>
+    </div>
+    <div class="tabela-wrap" style="max-height:65vh"><table><thead><tr>
+      <th>Peça</th><th class="dir">Estoque</th><th class="dir">Mín</th><th class="dir">Demanda/dia</th>
+      <th class="dir">Lead</th><th class="dir">Ponto Rep.</th><th>Criticidade</th>
+      <th class="dir">Qtd sug.</th><th class="dir">Custo un.</th><th>Fornecedor</th><th></th>
+    </tr></thead><tbody>
+    ${r.itens.map(s => `
+      <tr>
+        <td><strong>${esc(s.codigo)}</strong><div class="muted small">${esc(s.descricao)}${s.marca ? " · " + esc(s.marca) : ""}</div></td>
+        <td class="dir ${s.estoque <= 0 ? "erro" : ""}">${fmtQtd(s.estoque)}</td>
+        <td class="dir">${fmtQtd(s.min_stock)}</td>
+        <td class="dir">${s.demanda_diaria ? s.demanda_diaria.toFixed(2) : "—"}</td>
+        <td class="dir">${s.lead_dias}d</td>
+        <td class="dir">${s.ponto_reposicao ? s.ponto_reposicao.toFixed(1) : "—"}</td>
+        <td>${tagCriticidade(s.criticidade)}</td>
+        <td class="dir"><strong>${fmtQtd(s.qtd_sugerida)}</strong></td>
+        <td class="dir num">${fmtMoney(s.custo_unit_centavos)}</td>
+        <td class="small">${esc(s.fornecedor_nome || "(sem)")}${s.ja_em_pedido_aberto ? ' <span class="tag azul">em pedido</span>' : ""}</td>
+        <td class="dir" style="white-space:nowrap">
+          <button class="btn pequeno" onclick="abrirDetalhePecaEI(${s.part_id})">Ver peça</button>
+        </td>
+      </tr>
+    `).join("")}
+    </tbody></table></div>
+    <p class="dica">${r.itens.length} sugestão(ões). <strong>Criticidade:</strong> crítica = estoque ≤ 0 ou dias até faltar ≤ lead; média = abaixo do ponto de reposição; baixa = abaixo do mínimo sem demanda.</p>`;
+}
+
+function tagCriticidade(c) {
+  const map = { critica: ["vermelho", "Crítica"], media: ["amarelo", "Média"], baixa: ["azul", "Baixa"] };
+  const m = map[c] || ["cinza", c];
+  return `<span class="tag ${m[0]}">${m[1]}</span>`;
+}
+
+async function carregarEIParados() {
+  const alvo = $("#ei-corpo");
+  const r = await api("/estoque-inteligente/parados");
+  if (!r.itens.length) {
+    alvo.innerHTML = '<div class="vazio">Nenhum item parado detectado.<br><span class="small">Parado = estoque > 0 sem saída há mais de 90 dias (configurável).</span></div>';
+    return;
+  }
+  let total = 0;
+  r.itens.forEach(p => total += p.valor_parado_centavos);
+  alvo.innerHTML = `
+    <div class="topo" style="margin-bottom:10px">
+      <div class="acoes" style="flex:1">
+        <button class="btn" onclick="exportarEI('parados','csv')">⬇ CSV</button>
+        <button class="btn primario" onclick="abrirGerarPedidoEI()">Gerar pedido para zerar parados</button>
+      </div>
+      <div class="kv" style="margin-left:auto"><span>Valor total parado</span><strong>${fmtMoney(total)}</strong></div>
+    </div>
+    <div class="tabela-wrap" style="max-height:65vh"><table><thead><tr>
+      <th>Peça</th><th class="dir">Estoque</th><th class="dir">Custo un.</th>
+      <th class="dir">Valor parado</th><th>Última saída</th><th class="dir">Dias parado</th>
+    </tr></thead><tbody>
+    ${r.itens.map(p => `
+      <tr>
+        <td><strong>${esc(p.codigo)}</strong><div class="muted small">${esc(p.descricao)}${p.marca ? " · " + esc(p.marca) : ""}</div></td>
+        <td class="dir">${fmtQtd(p.estoque)}</td>
+        <td class="dir num">${fmtMoney(p.custo_unit_centavos)}</td>
+        <td class="dir num"><strong>${fmtMoney(p.valor_parado_centavos)}</strong></td>
+        <td class="small">${p.ultima_saida ? dataBR(p.ultima_saida) : "nunca"}</td>
+        <td class="dir">${p.dias_parado}d</td>
+      </tr>
+    `).join("")}
+    </tbody></table></div>`;
+}
+
+async function carregarEIABC() {
+  const alvo = $("#ei-corpo");
+  const r = await api("/estoque-inteligente/abc");
+  if (!r.itens.length) {
+    alvo.innerHTML = '<div class="vazio">Sem dados para Curva ABC.<br><span class="small">Vendas concluídas nos últimos 90 dias (configurável).</span></div>';
+    return;
+  }
+  let total = 0;
+  r.itens.forEach(x => total += x.receita);
+  alvo.innerHTML = `
+    <div class="topo" style="margin-bottom:10px">
+      <div class="acoes" style="flex:1">
+        <button class="btn" onclick="exportarEI('abc','csv')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="cards" style="margin-bottom:12px">
+      <div class="card"><div class="rotulo">Classe A (≤ 80%)</div><div class="valor">${r.itens.filter(x => x.classe === "A").length}</div></div>
+      <div class="card"><div class="rotulo">Classe B (≤ 95%)</div><div class="valor">${r.itens.filter(x => x.classe === "B").length}</div></div>
+      <div class="card"><div class="rotulo">Classe C (resto)</div><div class="valor">${r.itens.filter(x => x.classe === "C").length}</div></div>
+      <div class="card"><div class="rotulo">Receita total</div><div class="valor">${fmtMoney(total)}</div></div>
+    </div>
+    <div class="tabela-wrap" style="max-height:65vh"><table><thead><tr>
+      <th>Peça</th><th class="dir">Receita</th><th class="dir">% Acum.</th><th>Classe</th>
+    </tr></thead><tbody>
+    ${r.itens.map(x => `
+      <tr>
+        <td><strong>${esc(x.codigo)}</strong><div class="muted small">${esc(x.descricao)}${x.marca ? " · " + esc(x.marca) : ""}</div></td>
+        <td class="dir num">${fmtMoney(x.receita)}</td>
+        <td class="dir">${x.perc_acum.toFixed(1)}%</td>
+        <td><span class="tag ${x.classe === "A" ? "verde" : x.classe === "B" ? "amarelo" : "cinza"}">${x.classe}</span></td>
+      </tr>
+    `).join("")}
+    </tbody></table></div>`;
+}
+
+async function carregarEIComparar() {
+  const alvo = $("#ei-corpo");
+  const hojeStr = hoje();
+  const trinta = diasAtras(30);
+  const sessenta = diasAtras(60);
+
+  // Defaults se não definidos
+  if (!EI_PERIODO.de1) EI_PERIODO.de1 = trinta;
+  if (!EI_PERIODO.ate1) EI_PERIODO.ate1 = hojeStr;
+  if (!EI_PERIODO.de2) EI_PERIODO.de2 = sessenta;
+  if (!EI_PERIODO.ate2) EI_PERIODO.ate2 = diasAtras(31);
+
+  const q = new URLSearchParams(EI_PERIODO);
+  const r = await api("/estoque-inteligente/comparar?" + q.toString());
+
+  alvo.innerHTML = `
+    <div class="topo" style="margin-bottom:10px;flex-wrap:wrap">
+      <div class="grade g4" style="flex:1;margin-bottom:8px">
+        <div class="campo"><label>Período 1 — De</label><input type="date" id="cmp-de1" value="${EI_PERIODO.de1}"></div>
+        <div class="campo"><label>Período 1 — Até</label><input type="date" id="cmp-ate1" value="${EI_PERIODO.ate1}"></div>
+        <div class="campo"><label>Período 2 — De</label><input type="date" id="cmp-de2" value="${EI_PERIODO.de2}"></div>
+        <div class="campo"><label>Período 2 — Até</label><input type="date" id="cmp-ate2" value="${EI_PERIODO.ate2}"></div>
+      </div>
+      <div class="acoes" style="align-self:end">
+        <button class="btn primario" onclick="aplicarFiltroComparar()">Atualizar</button>
+      </div>
+    </div>
+    <div class="cards" style="margin-bottom:12px">
+      <div class="card"><div class="rotulo">Receita P1</div><div class="valor">${fmtMoney(r.periodo1.receita)}</div></div>
+      <div class="card"><div class="rotulo">Receita P2</div><div class="valor">${fmtMoney(r.periodo2.receita)}</div></div>
+      <div class="card"><div class="rotulo">Margem P1</div><div class="valor">${fmtMoney(r.periodo1.margem)}</div></div>
+      <div class="card"><div class="rotulo">Margem P2</div><div class="valor">${fmtMoney(r.periodo2.margem)}</div></div>
+      <div class="card"><div class="rotulo">Vendas P1</div><div class="valor">${r.periodo1.vendas}</div></div>
+      <div class="card"><div class="rotulo">Vendas P2</div><div class="valor">${r.periodo2.vendas}</div></div>
+      <div class="card"><div class="rotulo">Itens P1</div><div class="valor">${r.periodo1.itens}</div></div>
+      <div class="card"><div class="rotulo">Itens P2</div><div class="valor">${r.periodo2.itens}</div></div>
+    </div>
+    ${r.top_crescimento && r.top_crescimento.length ? `
+      <div class="painel" style="margin-top:12px">
+        <h3>Top 10 — Maior crescimento de receita (P2 vs P1)</h3>
+        <div class="tabela-wrap"><table><thead><tr>
+          <th>Peça</th><th class="dir">Receita P1</th><th class="dir">Receita P2</th><th class="dir">Crescimento</th>
+        </tr></thead><tbody>
+        ${r.top_crescimento.map(x => `
+          <tr>
+            <td><strong>${esc(x.codigo)}</strong><div class="muted small">${esc(x.descricao)}</div></td>
+            <td class="dir num">${fmtMoney(x.receita_p1)}</td>
+            <td class="dir num">${fmtMoney(x.receita_p2)}</td>
+            <td class="dir ${x.crescimento >= 0 ? "ok" : "erro"}">${x.crescimento >= 0 ? "+" : ""}${x.crescimento.toFixed(1)}%</td>
+          </tr>
+        `).join("")}
+        </tbody></table></div>
+      </div>` : ""}`;
+  
+  ["de1","ate1","de2","ate2"].forEach(id => {
+    const el = $("#cmp-"+id);
+    if (el) el.onchange = aplicarFiltroComparar;
+  });
+}
+
+function aplicarFiltroComparar() {
+  EI_PERIODO.de1 = $("#cmp-de1")?.value || "";
+  EI_PERIODO.ate1 = $("#cmp-ate1")?.value || "";
+  EI_PERIODO.de2 = $("#cmp-de2")?.value || "";
+  EI_PERIODO.ate2 = $("#cmp-ate2")?.value || "";
+  carregarEI();
+}
+
+async function carregarEIResumo() {
+  const alvo = $("#ei-corpo");
+  const r = await api("/estoque-inteligente/resumo");
+  const classes = r.classes_abc || { A: 0, B: 0, C: 0 };
+  alvo.innerHTML = `
+    <div class="cards" style="margin-bottom:12px">
+      <div class="card ${r.pecas_criticas > 0 ? "alerta" : "ok"}"><div class="rotulo">Críticas</div><div class="valor">${r.pecas_criticas}</div></div>
+      <div class="card ${r.pecas_media > 0 ? "aviso" : "ok"}"><div class="rotulo">Médias</div><div class="valor">${r.pecas_media}</div></div>
+      <div class="card ${r.pecas_baixa > 0 ? "info" : "ok"}"><div class="rotulo">Baixas</div><div class="valor">${r.pecas_baixa}</div></div>
+      <div class="card"><div class="rotulo">Sugestões</div><div class="valor">${r.sugestoes_count}</div></div>
+      <div class="card"><div class="rotulo">Custo estimado</div><div class="valor">${fmtMoney(r.custo_estimado_reposicao_centavos)}</div></div>
+      <div class="card"><div class="rotulo">Itens parados</div><div class="valor">${r.itens_parados}</div><div class="obs">${fmtMoney(r.valor_parado)} parado</div></div>
+      <div class="card"><div class="rotulo">ABC: A / B / C</div><div class="valor">${classes.A} / ${classes.B} / ${classes.C}</div></div>
+    </div>
+    <div class="painel">
+      <h3>Ações rápidas</h3>
+      <div class="acoes" style="margin-top:12px;flex-wrap:wrap">
+        <button class="btn primario" onclick="abrirGerarPedidoEI()">Gerar pedido a partir das sugestões</button>
+        <button class="btn" onclick="irPara('ei'); EI_ABA_ATIVA='sugestoes'; document.querySelector('[data-aba=sugestoes]').click()">Ver sugestões</button>
+        <button class="btn" onclick="irPara('ei'); EI_ABA_ATIVA='parados'; document.querySelector('[data-aba=parados]').click()">Ver estoque parado</button>
+        <button class="btn" onclick="abrirConfigEI()">Configurar parâmetros</button>
+      </div>
+    </div>`;
+}
+
+function exportarEI(lista, formato) {
+  window.location = `/api/estoque-inteligente/${lista}.${formato}`;
+}
+
+function abrirConfigEI() {
+  api("/estoque-inteligente/config").then(cfg => {
+    abrirModal("Configurações — Estoque Inteligente", `
+      <div class="grade g3">
+        <div class="campo"><label>Lead time padrão (dias)</label><input type="number" id="ei-lead" value="${cfg.lead_dias}" min="0"></div>
+        <div class="campo"><label>Estoque de segurança (dias)</label><input type="number" id="ei-seg" value="${cfg.seguranca_dias}" min="0"></div>
+        <div class="campo"><label>Janela de demanda (dias)</label><input type="number" id="ei-dem" value="${cfg.demanda_dias}" min="1"></div>
+        <div class="campo"><label>Parado após (dias)</label><input type="number" id="ei-par" value="${cfg.parado_dias}" min="1"></div>
+        <div class="campo"><label>ABC janela (dias)</label><input type="number" id="ei-abc" value="${cfg.abc_dias}" min="1"></div>
+      </div>
+      <div class="dica"><strong>Lead time:</strong> se o fornecedor não tem prazo cadastrado, usa este valor.<br>
+      <strong>Segurança:</strong> dias extras sobre o lead time para formar o ponto de reposição.<br>
+      <strong>Demanda:</strong> janela de dias para calcular a média diária de vendas.<br>
+      <strong>Parado:</strong> dias sem saída para classificar como estoque parado.<br>
+      <strong>ABC:</strong> janela de dias para calcular a receita por peça.</div>
+    `,
+    `<button class="btn" onclick="fecharModal()">Cancelar</button>
+     <button class="btn primario" onclick="salvarConfigEI()">Salvar</button>`);
+  }).catch(e => toast(e.message, "erro"));
+}
+window.abrirConfigEI = abrirConfigEI;
+
+function salvarConfigEI() {
+  const corpo = {
+    lead_dias: parseInt($("#ei-lead").value) || 7,
+    seguranca_dias: parseInt($("#ei-seg").value) || 3,
+    demanda_dias: parseInt($("#ei-dem").value) || 90,
+    parado_dias: parseInt($("#ei-par").value) || 90,
+    abc_dias: parseInt($("#ei-abc").value) || 90
+  };
+  api("/estoque-inteligente/config", { corpo, method: "POST" })
+    .then(() => { toast("Configurações salvas.", "ok"); fecharModal(); carregarEI(); })
+    .catch(e => toast(e.message, "erro"));
+}
+window.salvarConfigEI = salvarConfigEI;
+
+function abrirGerarPedidoEI() {
+  // Buscar sugestões atuais
+  api("/estoque-inteligente/sugestoes").then(r => {
+    if (!r.itens.length) {
+      toast("Nenhuma sugestão de compra no momento.", "aviso");
+      return;
+    }
+    const html = r.itens.map(s => `
+      <div class="alerta-linha" style="padding:8px 12px;align-items:center">
+        <input type="checkbox" class="pedido-chk" data-id="${s.part_id}" data-qtd="${s.qtd_sugerida}" ${s.criticidade === "critica" ? "checked" : ""}>
+        <div style="flex:1"><strong>${esc(s.codigo)}</strong> — ${esc(s.descricao)}</div>
+        <div class="small">${fmtQtd(s.estoque)} / mín ${fmtQtd(s.min_stock)} · Lead ${s.lead_dias}d · ${tagCriticidade(s.criticidade)}</div>
+        <div class="grade g2" style="width:220px;margin-top:4px">
+          <div class="campo" style="margin:0"><label>Qtd</label><input type="number" class="pedido-qtd" data-id="${s.part_id}" value="${s.qtd_sugerida}" min="1" step="1" style="width:80px"></div>
+          <div class="campo" style="margin:0"><label>Custo</label><input type="text" class="pedido-custo" data-id="${s.part_id}" value="${fmtMoneyBR(s.custo_unit_centavos)}" style="width:100px"></div>
+        </div>
+      </div>
+    `).join("");
+    abrirModal("Gerar pedido de compra", `
+      <div class="ok-box">Marque as peças que deseja pedir. A quantidade sugerida já vem preenchida — ajuste se quiser.</div>
+      <div style="max-height:55vh;overflow:auto">${html}</div>
+      <div class="dica">Peças do mesmo fornecedor serão agrupadas em um único pedido. <strong>O estoque NÃO muda agora</strong> — entra quando você receber o pedido na tela Pedidos.</div>
+    `,
+    `<button class="btn" onclick="fecharModal()">Cancelar</button>
+     <button class="btn primario" onclick="confirmarGerarPedidoEI()">Gerar ${r.itens.filter(s => s.criticidade==="critica").length || 1} pedido(s)</button>`);
+  }).catch(e => toast(e.message, "erro"));
+}
+window.abrirGerarPedidoEI = abrirGerarPedidoEI;
+
+function confirmarGerarPedidoEI() {
+  const itens = [];
+  $$(".pedido-chk:checked").forEach(chk => {
+    const id = Number(chk.dataset.id);
+    const qtd = parseQtd($(".pedido-qtd[data-id='"+id+"']")?.value || chk.dataset.qtd);
+    if (qtd > 0) itens.push({ part_id: id, quantidade: qtd });
+  });
+  if (!itens.length) { toast("Selecione ao menos uma peça.", "aviso"); return; }
+  api("/estoque-inteligente/pedido", { corpo: { itens }, method: "POST" })
+    .then(r => {
+      fecharModal();
+      if (r.pedidos && r.pedidos.length) {
+        toast("Pedido(s) gerado(s): " + r.pedidos.length + ". Veja em Pedidos.", "ok");
+        irPara("pedidos");
+        atualizarAlertas();
+      }
+    })
+    .catch(e => toast(e.message, "erro"));
+}
+window.confirmarGerarPedidoEI = confirmarGerarPedidoEI;
+
+function abrirDetalhePecaEI(id) {
+  irPara("pecas");
+  setTimeout(() => movEstoqueRapido(id), 300);
+}
+window.abrirDetalhePecaEI = abrirDetalhePecaEI;
+
 // fecharCaixaComBackup: encerra o dia e ja guarda o backup do fechamento.
 async function fecharCaixaComBackup() {
   const data = ($("#fech-data") || {}).value || hoje();

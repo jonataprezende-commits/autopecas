@@ -4,6 +4,34 @@ Todas as mudanças relevantes do AutoPecas. O formato segue o
 [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o versionamento
 segue o [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2026-11-17
+
+### Adicionado
+
+- **Módulo "Estoque Inteligente"** (nova tela acessível pelo menu lateral):
+  - **Sugestões de compra** baseadas em demanda real, ponto de reposição, estoque de segurança e lead time do fornecedor. Criticidade automática (Crítica/Média/Baixa) e quantidade sugerida calculada.
+  - **Estoque parado**: itens sem saída há N dias (configurável, padrão 90), ordenados por valor parado (estoque × custo médio).
+  - **Curva ABC** por receita nos últimos N dias (configurável, padrão 90): classes A (≤80%), B (≤95%), C (resto).
+  - **Comparação de períodos**: dois intervalos de datas lado a lado com receita, custo, margem, nº de vendas, itens vendidos + top 10 itens com maior crescimento de receita.
+  - **Configurações** ajustáveis pela tela: lead time padrão, estoque de segurança (dias), janela de demanda, dias para considerar parado, janela da Curva ABC.
+  - **Geração de pedido de compra** a partir das sugestões (ou seleção manual): agrupa por fornecedor, soma quantidades de peças repetidas, não altera estoque (entra no recebimento), não usa fichas de falta.
+  - **Exportação** CSV (sugestoes, parados, abc) e PDF (sugestões).
+  - **Resumo em cards**: críticas, médias, baixas, custo estimado de reposição, valor/itens parados, classes ABC.
+
+- **Prazo de entrega do fornecedor** (`suppliers.prazo_entrega_dias`, migração de dados 8): usado no cálculo do ponto de reposição; se não preenchido, usa o lead time padrão global.
+- Settings padrão do Estoque Inteligente criados no `firstRun`: `ei_lead_dias=7`, `ei_seguranca_dias=3`, `ei_demanda_dias=90`, `ei_parado_dias=90`, `ei_abc_dias=90`.
+
+### Alterado
+
+- **Fornecedores** (`GET/POST/PUT /api/fornecedores`): passa a incluir/expor `prazo_entrega_dias`.
+- **API de relatórios**: rotas de exportação CSV/PDF reutilizam a infraestrutura existente (BOM UTF-8, separador `;`).
+
+### Corrigido
+
+- Classificação da Curva ABC: agora usa o percentual acumulado **antes** do item (não depois), para que o item de maior receita fique na classe A mesmo quando é o único.
+- Cálculo de período em "Comparar": query SQL corrigida (JOIN em vez de subquery inválida `SUM(SELECT...)`).
+- Formato de data nas vendas criadas via API: `validarDataVenda` aceita `YYYY-MM-DD` e converte para timestamp completo.
+
 ## [1.0.12] - 2026-11-16
 
 ### Adicionado

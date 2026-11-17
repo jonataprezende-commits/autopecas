@@ -11,6 +11,7 @@ import (
 func (a *App) handleListSuppliers(w http.ResponseWriter, r *http.Request) {
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	sqlText := `SELECT s.id,s.name,IFNULL(s.contact,''),IFNULL(s.phone,''),IFNULL(s.email,''),IFNULL(s.notes,''),
+		IFNULL(s.prazo_entrega_dias,0),
 		(SELECT COUNT(*) FROM faltas f WHERE f.supplier_id=s.id AND f.status IN ('aberta','pedida')),
 		(SELECT COUNT(*) FROM parts p WHERE p.supplier_id=s.id AND p.active=1)
 		FROM suppliers s`
@@ -31,21 +32,24 @@ func (a *App) handleListSuppliers(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var id int64
 		var name, contact, phone, email, notes string
+		var prazo int
 		var fichas, pecas int
-		if rows.Scan(&id, &name, &contact, &phone, &email, &notes, &fichas, &pecas) == nil {
+		if rows.Scan(&id, &name, &contact, &phone, &email, &notes, &prazo, &fichas, &pecas) == nil {
 			out = append(out, map[string]any{"id": id, "nome": name, "contato": contact, "telefone": phone,
-				"email": email, "observacoes": notes, "fichas_abertas": fichas, "pecas": pecas})
+				"email": email, "observacoes": notes, "prazo_entrega_dias": prazo,
+				"fichas_abertas": fichas, "pecas": pecas})
 		}
 	}
 	writeJSON(w, 200, map[string]any{"itens": out})
 }
 
 type SupplierInput struct {
-	Nome        string `json:"nome"`
-	Contato     string `json:"contato"`
-	Telefone    string `json:"telefone"`
-	Email       string `json:"email"`
-	Observacoes string `json:"observacoes"`
+	Nome             string `json:"nome"`
+	Contato          string `json:"contato"`
+	Telefone         string `json:"telefone"`
+	Email            string `json:"email"`
+	Observacoes      string `json:"observacoes"`
+	PrazoEntregaDias int    `json:"prazo_entrega_dias"`
 }
 
 func (a *App) handleSaveSupplier(w http.ResponseWriter, r *http.Request) {
@@ -59,18 +63,21 @@ func (a *App) handleSaveSupplier(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "informe o nome do fornecedor")
 		return
 	}
+	if in.PrazoEntregaDias < 0 {
+		in.PrazoEntregaDias = 0
+	}
 	id, _ := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	if id == 0 {
-		res, err := a.db.Exec(`INSERT INTO suppliers(name,contact,phone,email,notes,created_at) VALUES(?,?,?,?,?,?)`,
-			in.Nome, in.Contato, in.Telefone, in.Email, in.Observacoes, nowISO())
+		res, err := a.db.Exec(`INSERT INTO suppliers(name,contact,phone,email,notes,prazo_entrega_dias,created_at) VALUES(?,?,?,?,?,?,?)`,
+			in.Nome, in.Contato, in.Telefone, in.Email, in.Observacoes, in.PrazoEntregaDias, nowISO())
 		if err != nil {
 			fail(w, 500, err.Error())
 			return
 		}
 		id, _ = res.LastInsertId()
 	} else {
-		if _, err := a.db.Exec(`UPDATE suppliers SET name=?,contact=?,phone=?,email=?,notes=? WHERE id=?`,
-			in.Nome, in.Contato, in.Telefone, in.Email, in.Observacoes, id); err != nil {
+		if _, err := a.db.Exec(`UPDATE suppliers SET name=?,contact=?,phone=?,email=?,notes=?,prazo_entrega_dias=? WHERE id=?`,
+			in.Nome, in.Contato, in.Telefone, in.Email, in.Observacoes, in.PrazoEntregaDias, id); err != nil {
 			fail(w, 500, err.Error())
 			return
 		}

@@ -375,7 +375,8 @@ func criarIndiceBuscaCatalogo(tx *sql.Tx) error {
 // 5 = indice catalog_fts (busca instantanea com catalogo grande)
 // 6 = payables (contas a pagar), notas_entrada (nota importada) e suppliers.doc
 // 7 = parts.avg_cost_cents (custo medio ponderado das compras)
-const versaoEsquema = 7
+// 8 = suppliers.prazo_entrega_dias + settings ei_* (Estoque Inteligente)
+const versaoEsquema = 8
 
 func (a *App) userVersion() (int, error) {
 	var v int
@@ -557,6 +558,20 @@ func (a *App) aplicarMigracao(n int) error {
 				WHERE avg_cost_cents=0 AND cost_cents>0`); err != nil {
 				return err
 			}
+		case 8:
+			// Estoque Inteligente: prazo de entrega do fornecedor + configs
+			if err := colunaSeFaltar(tx, "suppliers", "prazo_entrega_dias", `INTEGER NOT NULL DEFAULT 0`); err != nil {
+				return err
+			}
+			// settings default (firstRun já garante, mas migração roda antes)
+			for _, kv := range []struct{ k, v string }{
+				{"ei_lead_dias", "7"}, {"ei_seguranca_dias", "3"}, {"ei_demanda_dias", "90"},
+				{"ei_parado_dias", "90"}, {"ei_abc_dias", "90"},
+			} {
+				if _, err := tx.Exec(`INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`, kv.k, kv.v); err != nil {
+					return err
+				}
+			}
 		default:
 			return fmt.Errorf("migração %d desconhecida", n)
 		}
@@ -642,6 +657,12 @@ func (a *App) firstRun() {
 		"backup_limite_mb":          "300",
 		"permitir_estoque_negativo": "1",
 		"prazo_faturado_dias":       "30",
+		// Estoque Inteligente (v1.1)
+		"ei_lead_dias":      "7",
+		"ei_seguranca_dias": "3",
+		"ei_demanda_dias":   "90",
+		"ei_parado_dias":    "90",
+		"ei_abc_dias":       "90",
 	}
 	for k, v := range defaults {
 		if a.db.GetSetting(k) == "" {

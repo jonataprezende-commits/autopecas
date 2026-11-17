@@ -27,7 +27,7 @@ import (
 var webFS embed.FS
 
 const appName = "AutoPecas"
-const appVersion = "1.0.12"
+const appVersion = "1.1.0"
 
 type App struct {
 	db  *DB
@@ -328,6 +328,20 @@ func (a *App) routes() http.Handler {
 	// Estoque
 	m.HandleFunc("POST /api/estoque/movimento", a.handleStockMove)
 	m.HandleFunc("GET /api/estoque/movimentos", a.handleStockMoves)
+
+	// Estoque Inteligente (v1.1)
+	m.HandleFunc("GET /api/estoque-inteligente/resumo", a.handleEIResumo)
+	m.HandleFunc("GET /api/estoque-inteligente/sugestoes", a.handleEISugestoes)
+	m.HandleFunc("GET /api/estoque-inteligente/parados", a.handleEIParados)
+	m.HandleFunc("GET /api/estoque-inteligente/abc", a.handleEIABC)
+	m.HandleFunc("GET /api/estoque-inteligente/comparar", a.handleEIComparar)
+	m.HandleFunc("GET /api/estoque-inteligente/config", a.handleEIConfig)
+	m.HandleFunc("POST /api/estoque-inteligente/config", a.handleEIConfig)
+	m.HandleFunc("POST /api/estoque-inteligente/pedido", a.handleEIGerarPedido)
+	m.HandleFunc("GET /api/estoque-inteligente/sugestoes.csv", a.handleEICSV)
+	m.HandleFunc("GET /api/estoque-inteligente/parados.csv", a.handleEICSV)
+	m.HandleFunc("GET /api/estoque-inteligente/abc.csv", a.handleEICSV)
+	m.HandleFunc("GET /api/estoque-inteligente/sugestoes.pdf", a.handleEIPDF)
 
 	// Fichas de falta
 	m.HandleFunc("GET /api/fichas", a.handleListFaltas)

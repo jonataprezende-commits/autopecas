@@ -125,7 +125,7 @@ func TestMigracaoCustoMedioExiste(t *testing.T) {
 	if err != nil {
 		t.Fatalf("coluna avg_cost_cents ausente: %v", err)
 	}
-	if v, err := env.app.userVersion(); err != nil || v != 7 {
-		t.Fatalf("user_version deveria ser 7, veio %d (err=%v)", v, err)
+	if v, err := env.app.userVersion(); err != nil || v != 8 {
+		t.Fatalf("user_version deveria ser 8, veio %d (err=%v)", v, err)
 	}
 }
